@@ -36,7 +36,13 @@ class MainApp(App):
 
     def capture_image(self, instance):
         image_path = self.camera.capture_image()
-        self.info_label.text = f"Imagen capturada: {image_path}"
+        if image_path:
+            text = self.camera.process_image(image_path)
+            data = self.camera.extract_data(text)
+            self.info_input.text = f"{data.get('fecha_caducidad', '')}, {data.get('lote', '')}, {data.get('precio', '')}, {data.get('proveedor', '')}"
+            self.info_label.text = f"Imagen capturada: {image_path}"
+        else:
+            self.info_label.text = "Error al capturar la imagen"
 
     def save_info(self, instance):
         info = self.info_input.text.split(',')
