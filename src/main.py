@@ -1,47 +1,55 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
 from camera import Camera
 from inventory import Inventory
 
-def main():
-    # Inicializar la cámara
-    camera = Camera()
-    
-    # Inicializar el inventario
-    inventory = Inventory()
-    
-    while True:
-        print("Opciones:")
-        print("1. Capturar imagen")
-        print("2. Agregar producto al inventario")
-        print("3. Listar productos en el inventario")
-        print("4. Salir")
-        
-        choice = input("Seleccione una opción: ")
-        
-        if choice == '1':
-            image_path = camera.capture_image()
-            # Aquí se procesaría la imagen para extraer datos
-            print(f"Imagen capturada: {image_path}")
-        
-        elif choice == '2':
-            # Aquí se agregarían los datos del producto al inventario
-            # Se asume que se obtienen de la imagen procesada
-            fecha_caducidad = input("Ingrese la fecha de caducidad: ")
-            lote = input("Ingrese el lote: ")
-            precio = float(input("Ingrese el precio: "))
-            proveedor = input("Ingrese el proveedor: ")
-            inventory.add_product(fecha_caducidad, lote, precio, proveedor)
-        
-        elif choice == '3':
-            products = inventory.list_products()
-            for product in products:
-                print(product)
-        
-        elif choice == '4':
-            print("Saliendo de la aplicación.")
-            break
-        
-        else:
-            print("Opción no válida. Intente de nuevo.")
+class MainApp(App):
+    def build(self):
+        self.title = 'Inventario de Chuches'
+        layout = BoxLayout(orientation='vertical')
 
-if __name__ == "__main__":
-    main()
+        self.camera = Camera()
+        self.inventory = Inventory()
+
+        self.info_label = Label(text='Información de la etiqueta:')
+        layout.add_widget(self.info_label)
+
+        self.info_input = TextInput(hint_text='Fecha de caducidad, lote, precio, proveedor')
+        layout.add_widget(self.info_input)
+
+        capture_button = Button(text='Capturar Imagen')
+        capture_button.bind(on_press=self.capture_image)
+        layout.add_widget(capture_button)
+
+        save_button = Button(text='Guardar')
+        save_button.bind(on_press=self.save_info)
+        layout.add_widget(save_button)
+
+        list_button = Button(text='Listar Productos')
+        list_button.bind(on_press=self.list_products)
+        layout.add_widget(list_button)
+
+        return layout
+
+    def capture_image(self, instance):
+        image_path = self.camera.capture_image()
+        self.info_label.text = f"Imagen capturada: {image_path}"
+
+    def save_info(self, instance):
+        info = self.info_input.text.split(',')
+        if len(info) == 4:
+            fecha_caducidad, lote, precio, proveedor = info
+            self.inventory.add_product(fecha_caducidad.strip(), lote.strip(), float(precio.strip()), proveedor.strip())
+            self.info_label.text = 'Información guardada'
+        else:
+            self.info_label.text = 'Formato incorrecto. Use: fecha, lote, precio, proveedor'
+
+    def list_products(self, instance):
+        products = self.inventory.list_products()
+        self.info_label.text = '\n'.join(str(product) for product in products)
+
+if __name__ == '__main__':
+    MainApp().run()
