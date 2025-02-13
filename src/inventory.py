@@ -2,12 +2,10 @@ class Inventory:
     def __init__(self):
         self.products = []
 
-    def add_product(self, fecha_caducidad, lote, precio, proveedor):
+    def add_product(self, fecha_caducidad, lote):
         product = {
             'fecha_caducidad': fecha_caducidad,
-            'lote': lote,
-            'precio': precio,
-            'proveedor': proveedor
+            'lote': lote
         }
         self.products.append(product)
 
