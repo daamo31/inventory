@@ -13,14 +13,14 @@ class CameraWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(CameraWidget, self).__init__(**kwargs)
         self.orientation = 'vertical'
-        self.image = Image(size_hint=(1, 0.5))
+        self.image = Image(size_hint=(1, 5))
         self.add_widget(self.image)
 
-        self.capture_button = Button(text='Capturar')
+        self.capture_button = Button()
         self.capture_button.bind(on_press=self.capture)
         self.add_widget(self.capture_button)
 
-        self.info_label = Label(text='Información de la etiqueta:')
+        self.info_label = Label()  # Asegurarse de que info_label esté definido
         self.add_widget(self.info_label)
 
         self.capture_device = None
