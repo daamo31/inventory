@@ -1,7 +1,7 @@
 import re
 import cv2
-import pytesseract
 import numpy as np
+import easyocr
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.image import Image
@@ -26,6 +26,7 @@ class CameraWidget(BoxLayout):
         self.add_widget(self.info_label)
 
         self.capture_device = None
+        self.reader = easyocr.Reader(['es', 'en'])  # Inicializa el lector de easyocr
 
     def start_camera(self):
         """Inicia la captura de la cámara."""
@@ -51,7 +52,7 @@ class CameraWidget(BoxLayout):
                 self.image.texture = image_texture
 
     def capture(self, *args):
-        """Captura una imagen y procesa el texto con OCR."""
+        """Captura una imagen, procesa el texto con OCR y extrae los datos."""
         if self.capture_device:
             ret, frame = self.capture_device.read()
             if not ret:
@@ -82,8 +83,9 @@ class CameraWidget(BoxLayout):
         processed_image_path = 'processed_image.png'
         cv2.imwrite(processed_image_path, image)
 
-        custom_config = r'--psm 6 --oem 3 -c tessedit_char_whitelist="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzL/- "'
-        text = pytesseract.image_to_string(image, config=custom_config).strip()
+        # Utilizar easyocr para extraer texto
+        result = self.reader.readtext(image)
+        text = " ".join([res[1] for res in result])
 
         data = self.extract_data(text)
         return text, data

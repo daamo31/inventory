@@ -95,16 +95,15 @@ class CameraScreen(Screen):
         self.camera_widget.stop_camera()
 
     def capture_image(self, instance):
-        Clock.schedule_once(self.process_image, 2)  # Espera 2 segundos antes de capturar
+        image_path = self.camera_widget.capture()  # Usa el método capture() de CameraWidget
 
-    def process_image(self, dt):
-        image_path = self.camera_widget.capture_image()
-        if not image_path:
+        if image_path:
+            Clock.schedule_once(lambda dt: self.process_image(image_path), 2)  # Procesa inmediatamente
+        else:
             self.info_label.text = "Error al capturar la imagen"
-            return
 
-        text = self.camera_widget.extract_text(image_path)
-        data = self.camera_widget.extract_data(text)
+    def process_image(self, image_path, *args):  # Recibe image_path
+        text, data = self.camera_widget.preprocess_and_ocr(image_path)
 
         if data:
             self.info_input.text = f"{data.get('fecha_caducidad', '')}, {data.get('lote', '')}"
@@ -131,6 +130,7 @@ class CameraScreen(Screen):
 
     def go_back(self, instance):
         self.manager.current = 'main_menu'
+
 class MainApp(App):
     def build(self):
         self.title = 'Inventario'
