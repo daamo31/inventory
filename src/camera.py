@@ -122,7 +122,7 @@ class CameraWidget(BoxLayout):
 
         # Patrón de fecha mejorado para detectar diferentes formatos
         fecha_pattern = re.compile(r'\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}[-/]\d{2}|\d{2}[-/]\d{4})\b')
-        lote_pattern = re.compile(r'\b[L]?\d+[A-Za-z]?\d*\b')
+        lote_pattern = re.compile(r'\b[L]?\d+[A-Za-z]?\d*[A-Za-z]?\d*\b')
 
         fecha_match = fecha_pattern.search(text)
         if fecha_match:
@@ -136,9 +136,13 @@ class CameraWidget(BoxLayout):
                 except ValueError:
                     pass
 
-        lote_match = lote_pattern.search(text)
-        if lote_match:
-            data['lote'] = lote_match.group(0)
+            # Buscar el lote después de la fecha
+            lote_match = lote_pattern.search(text, fecha_match.end())
+            if lote_match:
+                data['lote'] = lote_match.group(0)
+
+        # Imprime los datos para depuración
+        print(f"Fecha de caducidad: {data.get('fecha_caducidad', 'N/A')}, Lote: {data.get('lote', 'N/A')}")
 
         return data if data else None
 

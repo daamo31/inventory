@@ -98,23 +98,19 @@ class CameraScreen(Screen):
         image_path = self.camera_widget.capture()  # Usa el método capture() de CameraWidget
 
         if image_path:
-            Clock.schedule_once(lambda dt: self.process_image(image_path), 2)  # Procesa inmediatamente
+            self.process_image(image_path)  # Llama a process_image DIRECTAMENTE
         else:
             self.info_label.text = "Error al capturar la imagen"
 
-    def process_image(self, image_path, *args):  # Recibe image_path
+    def process_image(self, image_path):  # Elimina el argumento *args
         text, data = self.camera_widget.preprocess_and_ocr(image_path)
 
         if data:
             self.update_info_input(data)
             self.info_label.text = f"Datos extraídos: {data.get('fecha_caducidad', 'N/A')}, {data.get('lote', 'N/A')}"
-            Clock.schedule_once(lambda dt: self.force_update(), 0)  
+            # No es necesario force_update aquí
         else:
             self.info_label.text = "No se pudieron extraer datos de la imagen"
-
-    def force_update(self):
-        self.info_input.focus = True
-        self.info_input.focus = False
 
     def save_info(self, instance):
         info = self.info_input.text.split(',')
