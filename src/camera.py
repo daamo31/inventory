@@ -1,21 +1,22 @@
 import re
-import cv2
-import numpy as np
+import cv2  # Usaremos OpenCV para preprocesamiento
 import easyocr
+from PIL import Image
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.image import Image
+from kivy.uix.image import Image as KivyImage
 from kivy.uix.label import Label
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from datetime import datetime
+import numpy as np
 
 class CameraWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(CameraWidget, self).__init__(**kwargs)
         self.orientation = 'vertical'
 
-        self.image = Image(size_hint=(1, 5))
+        self.image = KivyImage(size_hint=(1, 5))
         self.add_widget(self.image)
 
         self.capture_button = Button(text="Capturar Imagen")
@@ -66,6 +67,7 @@ class CameraWidget(BoxLayout):
 
             if data:
                 self.info_label.text = f"Fecha: {data.get('fecha_caducidad', 'N/A')}, Lote: {data.get('lote', 'N/A')}"
+                self.parent.parent.update_info_input(data)
             else:
                 self.info_label.text = "No se encontraron datos en la imagen"
 
@@ -74,41 +76,58 @@ class CameraWidget(BoxLayout):
 
     def preprocess_and_ocr(self, image_path):
         """Preprocesa la imagen y extrae texto con OCR."""
-        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        # 1. Abre la imagen con OpenCV (para mejor manejo de escala de grises)
+        image_cv = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-        # Aplicar preprocesamiento
-        image = self.apply_preprocessing(image)
+        # 2. Preprocesamiento MEJORADO con OpenCV
+        image_cv = self.apply_preprocessing(image_cv)
 
-        # Guardar la imagen preprocesada
-        processed_image_path = 'processed_image.png'
-        cv2.imwrite(processed_image_path, image)
+        # 3. Guarda la imagen preprocesada (para depuración)
+        processed_image_path_cv = 'processed_image_cv.png'
+        cv2.imwrite(processed_image_path_cv, image_cv)
 
-        # Utilizar easyocr para extraer texto
-        result = self.reader.readtext(image)
+        # 4. Convierte la imagen de OpenCV a PIL (EasyOCR usa PIL)
+        image_pil = Image.fromarray(image_cv)
+
+        # 5. OCR con EasyOCR
+        result = self.reader.readtext(np.array(image_pil))  # Usa la imagen procesada
         text = " ".join([res[1] for res in result])
+        print(f"Texto OCR (EasyOCR): {text}")  # Imprime el texto para depuración
 
         data = self.extract_data(text)
         return text, data
 
-    def apply_preprocessing(self, image):
-        """Aplica filtros para mejorar la detección de texto en la imagen."""
-        image = cv2.GaussianBlur(image, (5, 5), 0)  # Reducción de ruido
-        image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-        kernel = np.ones((2, 2), np.uint8)
-        image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
-        return image
+    def apply_preprocessing(self, image_cv):
+        """Preprocesamiento ROBUSTO con OpenCV."""
+
+        # 1. Aumento de contraste (CLAHE)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        image_cv = clahe.apply(image_cv)
+
+        # 2. Binarización adaptativa (THRESH_OTSU para imágenes con iluminación variable)
+        _, image_cv = cv2.threshold(image_cv, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # 3. Eliminación de ruido (morfología - OPEN para eliminar puntos blancos)
+        kernel = np.ones((3, 3), np.uint8)
+        image_cv = cv2.morphologyEx(image_cv, cv2.MORPH_OPEN, kernel, iterations=1)
+
+        # 4. Inversión de colores (si es necesario)
+        image_cv = cv2.bitwise_not(image_cv)  # Invierte los colores
+
+        return image_cv
 
     def extract_data(self, text):
         """Extrae fecha de caducidad y número de lote del texto OCR."""
         data = {}
 
-        fecha_pattern = re.compile(r'\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}[-/]\d{2}|\d{2}[-]\d{4})\b')
+        # Patrón de fecha mejorado para detectar diferentes formatos
+        fecha_pattern = re.compile(r'\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}[-/]\d{2}|\d{2}[-/]\d{4})\b')
         lote_pattern = re.compile(r'\b[L]?\d+[A-Za-z]?\d*\b')
 
         fecha_match = fecha_pattern.search(text)
         if fecha_match:
             fecha_str = fecha_match.group(1)
-            formatos = ["%d-%m-%Y", "%d/%m/%Y", "%d-%m-%y", "%d/%m-%y", "%m-%Y", "%m/%Y"]
+            formatos = ["%d-%m-%Y", "%d/%m/%Y", "%d-%m-%y", "%d/%m/%y", "%m-%Y", "%m/%Y"]
             for fmt in formatos:
                 try:
                     fecha = datetime.strptime(fecha_str, fmt).strftime("%d/%m/%Y")
@@ -122,3 +141,7 @@ class CameraWidget(BoxLayout):
             data['lote'] = lote_match.group(0)
 
         return data if data else None
+
+    def update_info_input(self, data):
+        """Actualiza el campo de entrada de información en la interfaz de usuario."""
+        self.parent.parent.update_info_input(data)

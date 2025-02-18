@@ -106,7 +106,7 @@ class CameraScreen(Screen):
         text, data = self.camera_widget.preprocess_and_ocr(image_path)
 
         if data:
-            self.info_input.text = f"{data.get('fecha_caducidad', '')}, {data.get('lote', '')}"
+            self.update_info_input(data)
             self.info_label.text = f"Datos extraídos: {data.get('fecha_caducidad', 'N/A')}, {data.get('lote', 'N/A')}"
             Clock.schedule_once(lambda dt: self.force_update(), 0)  
         else:
@@ -130,6 +130,13 @@ class CameraScreen(Screen):
 
     def go_back(self, instance):
         self.manager.current = 'main_menu'
+
+    def update_info_input(self, data):
+        """Actualiza el campo de entrada de información en la interfaz de usuario."""
+        if data:
+            self.info_input.text = f"{data.get('fecha_caducidad', 'N/A')}, {data.get('lote', 'N/A')}"
+        else:
+            self.info_label.text = "No se pudieron extraer datos de la imagen"
 
 class MainApp(App):
     def build(self):
