@@ -67,7 +67,8 @@ class CameraWidget(BoxLayout):
 
             if data:
                 self.info_label.text = f"Fecha: {data.get('fecha_caducidad', 'N/A')}, Lote: {data.get('lote', 'N/A')}"
-                self.parent.parent.update_info_input(data)
+                if self.parent.__class__.__name__ == 'AddProductLoteScreen':
+                    self.parent.update_info_input(data)
             else:
                 self.info_label.text = "No se encontraron datos en la imagen"
 
@@ -148,4 +149,4 @@ class CameraWidget(BoxLayout):
 
     def update_info_input(self, data):
         """Actualiza el campo de entrada de información en la interfaz de usuario."""
-        self.parent.parent.update_info_input(data)
+        self.parent.update_info_input(data)

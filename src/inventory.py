@@ -1,32 +1,64 @@
-class Inventory:
-    def __init__(self):
-        self.products = []
+import sqlite3
+import os
+import shutil
 
-    def add_product(self, fecha_caducidad, lote):
-        product = {
-            'fecha_caducidad': fecha_caducidad,
-            'lote': lote
-        }
-        self.products.append(product)
+class Inventory:
+    def __init__(self, db_path='inventory.db', images_dir='images'):
+        self.db_path = db_path
+        self.images_dir = images_dir
+        os.makedirs(self.images_dir, exist_ok=True)
+        self.conn = sqlite3.connect(self.db_path)
+        self.create_table()
+
+    def create_table(self):
+        with self.conn:
+            # Elimina la tabla existente si ya existe
+            self.conn.execute('DROP TABLE IF EXISTS products')
+            # Crea una nueva tabla sin la columna `foto`
+            self.conn.execute('''
+                CREATE TABLE products (
+                    id INTEGER PRIMARY KEY,
+                    nombre TEXT NOT NULL,
+                    proveedor TEXT NOT NULL,
+                    fecha_caducidad TEXT NOT NULL,
+                    lote TEXT NOT NULL UNIQUE,
+                    coste REAL NOT NULL,
+                    pvp REAL NOT NULL,
+                    image_path TEXT
+                )
+            ''')
+
+    def add_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp):
+        # Copia la imagen al directorio de imágenes
+        image_filename = os.path.basename(image_path)
+        image_dest_path = os.path.join(self.images_dir, image_filename)
+        shutil.copy(image_path, image_dest_path)
+
+        with self.conn:
+            self.conn.execute('''
+                INSERT INTO products (nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), lote.upper(), coste, pvp, image_dest_path))
 
     def remove_product(self, lote):
-        self.products = [product for product in self.products if product['lote'] != lote]
+        with self.conn:
+            self.conn.execute('''
+                DELETE FROM products WHERE lote = ?
+            ''', (lote.upper(),))
 
     def list_products(self):
-        return self.products
+        with self.conn:
+            cursor = self.conn.execute('''
+                SELECT nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path FROM products
+            ''')
+            return cursor.fetchall()
 
     def find_product(self, lote):
-        for product in self.products:
-            if product['lote'] == lote:
-                return product
-        return None
+        with self.conn:
+            cursor = self.conn.execute('''
+                SELECT nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path FROM products WHERE lote = ?
+            ''', (lote.upper(),))
+            return cursor.fetchone()
 
-    def save_to_file(self, filename):
-        import json
-        with open(filename, 'w') as file:
-            json.dump(self.products, file)
-
-    def load_from_file(self, filename):
-        import json
-        with open(filename, 'r') as file:
-            self.products = json.load(file)
+    def close(self):
+        self.conn.close()
