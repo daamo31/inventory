@@ -6,6 +6,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.image import Image
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
 from camera import CameraWidget
 from inventory import Inventory
 from kivy.clock import Clock
@@ -73,21 +75,48 @@ class ViewInventoryScreen(Screen):
         super(ViewInventoryScreen, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
-        self.info_label = Label(text='Inventario:')
-        layout.add_widget(self.info_label)
+        search_layout = BoxLayout(size_hint=(1, 0.1), spacing=10)
+        self.search_input = TextInput(hint_text='Buscar por nombre, proveedor, fecha de caducidad o lote', size_hint=(0.8, 1))
+        search_button = Button(text='Buscar', size_hint=(0.2, 1))
+        search_button.bind(on_press=self.search_product)
+        search_layout.add_widget(self.search_input)
+        search_layout.add_widget(search_button)
+        layout.add_widget(search_layout)
 
-        self.product_list = Label(size_hint=(1, 0.8))
-        layout.add_widget(self.product_list)
+        self.scroll_view = ScrollView(size_hint=(1, 0.8))
+        self.grid_layout = GridLayout(cols=7, size_hint_y=None)
+        self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
+        self.scroll_view.add_widget(self.grid_layout)
+        layout.add_widget(self.scroll_view)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = Button(text='Atrás', size_hint=(1, 0.1))
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
         self.add_widget(layout)
 
     def on_enter(self):
-        products = self.manager.inventory.list_products()
-        self.product_list.text = '\n'.join(f"Foto: {product[0]}, Nombre: {product[1]}, Proveedor: {product[2]}, Fecha: {product[3]}, Lote: {product[4]}, Coste: {product[5]}, PVP: {product[6]}" for product in products)
+        self.display_products(self.manager.inventory.list_products())
+
+    def display_products(self, products):
+        self.grid_layout.clear_widgets()
+        headers = ['Foto', 'Nombre', 'Proveedor', 'Fecha', 'Lote', 'Coste', 'PVP']
+        for header in headers:
+            self.grid_layout.add_widget(Label(text=header, bold=True))
+
+        for product in products:
+            image = Image(source=product[6], size_hint_y=None, height=100)
+            self.grid_layout.add_widget(image)
+            for detail in product[:6]:
+                self.grid_layout.add_widget(Label(text=str(detail)))
+
+    def search_product(self, instance):
+        query = self.search_input.text.strip().upper()
+        if query:
+            filtered_products = self.manager.inventory.find_product(query)
+            self.display_products(filtered_products)
+        else:
+            self.display_products(self.manager.inventory.list_products())
 
     def go_back(self, instance):
         self.manager.current = 'inventory'
@@ -120,6 +149,7 @@ class AddProductPhotoScreen(Screen):
 
     def on_enter(self):
         self.camera_widget.start_camera()
+        self.manager.get_screen('add_product_name').clear_fields()
 
     def on_leave(self):
         self.camera_widget.stop_camera()
@@ -173,6 +203,10 @@ class AddProductNameScreen(Screen):
     def go_back(self, instance):
         self.manager.current = 'add_product_photo'
 
+    def clear_fields(self):
+        self.nombre_input.text = ''
+        self.image_preview.source = ''
+
 
 class AddProductProveedorScreen(Screen):
     def __init__(self, **kwargs):
@@ -207,7 +241,13 @@ class AddProductProveedorScreen(Screen):
     def update_info_input(self, data):
         """Actualiza los campos de entrada de información en la interfaz de usuario."""
         if data:
-            self.proveedor_input.text = data.get('proveedor', 'N/A')
+            if 'nombre' in data:
+                self.manager.get_screen('add_product_name').nombre_input.text = data['nombre']
+            if 'proveedor' in data:
+                self.proveedor_input.text = data['proveedor']
+
+    def clear_fields(self):
+        self.proveedor_input.text = ''
 
 
 class AddProductLoteScreen(Screen):
@@ -237,6 +277,7 @@ class AddProductLoteScreen(Screen):
 
     def on_enter(self):
         self.camera_widget.start_camera()
+        self.manager.get_screen('add_product_price').clear_fields()
 
     def on_leave(self):
         self.camera_widget.stop_camera()
@@ -307,9 +348,16 @@ class AddProductPriceScreen(Screen):
     def update_info_input(self, data):
         """Actualiza los campos de entrada de información en la interfaz de usuario."""
         if data:
-            self.manager.get_screen('add_product_name').nombre_input.text = data.get('nombre', 'N/A')
-            self.manager.get_screen('add_product_proveedor').proveedor_input.text = data.get('proveedor', 'N/A')
-            self.manager.get_screen('add_product_lote').camera_widget.info_label.text = f"{data.get('fecha_caducidad', 'N/A')}, {data.get('lote', 'N/A')}"
+            if 'nombre' in data:
+                self.manager.get_screen('add_product_name').nombre_input.text = data['nombre']
+            if 'proveedor' in data:
+                self.manager.get_screen('add_product_proveedor').proveedor_input.text = data['proveedor']
+            if 'fecha_caducidad' in data and 'lote' in data:
+                self.manager.get_screen('add_product_lote').camera_widget.info_label.text = f"{data['fecha_caducidad']}, {data['lote']}"
+
+    def clear_fields(self):
+        self.coste_input.text = ''
+        self.pvp_input.text = ''
 
 
 class ModifyProductScreen(Screen):
@@ -356,7 +404,7 @@ class ModifyProductScreen(Screen):
 
     def on_enter(self):
         products = self.manager.inventory.list_products()
-        self.product_spinner.values = [f"{product[4]}" for product in products]
+        self.product_spinner.values = [f"{product[3]}" for product in products]
 
     def modify_product(self, instance):
         lote = self.product_spinner.text
@@ -406,7 +454,7 @@ class DeleteProductScreen(Screen):
 
     def on_enter(self):
         products = self.manager.inventory.list_products()
-        self.product_spinner.values = [f"{product[4]}" for product in products]
+        self.product_spinner.values = [f"{product[3]}" for product in products]
 
     def delete_product(self, instance):
         lote = self.product_spinner.text

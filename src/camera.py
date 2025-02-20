@@ -66,7 +66,7 @@ class CameraWidget(BoxLayout):
             text, data = self.preprocess_and_ocr(image_path)
 
             if data:
-                self.info_label.text = f"Fecha: {data.get('fecha_caducidad', 'N/A')}, Lote: {data.get('lote', 'N/A')}"
+                self.info_label.text = f" {data.get('fecha_caducidad', 'N/A')}, {data.get('lote', 'N/A')}"
                 if self.parent.__class__.__name__ == 'AddProductLoteScreen':
                     self.parent.update_info_input(data)
             else:
@@ -137,10 +137,13 @@ class CameraWidget(BoxLayout):
                 except ValueError:
                     pass
 
-            # Buscar el lote después de la fecha
-            lote_match = lote_pattern.search(text, fecha_match.end())
-            if lote_match:
-                data['lote'] = lote_match.group(0)
+            # Buscar el lote antes y después de la fecha
+            lote_match_before = lote_pattern.search(text, 0, fecha_match.start())
+            lote_match_after = lote_pattern.search(text, fecha_match.end())
+            if lote_match_before:
+                data['lote'] = lote_match_before.group(0)
+            elif lote_match_after:
+                data['lote'] = lote_match_after.group(0)
 
         # Imprime los datos para depuración
         print(f"Fecha de caducidad: {data.get('fecha_caducidad', 'N/A')}, Lote: {data.get('lote', 'N/A')}")

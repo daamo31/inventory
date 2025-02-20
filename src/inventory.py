@@ -12,11 +12,9 @@ class Inventory:
 
     def create_table(self):
         with self.conn:
-            # Elimina la tabla existente si ya existe
-            self.conn.execute('DROP TABLE IF EXISTS products')
-            # Crea una nueva tabla sin la columna `foto`
+            # Crea una nueva tabla solo si no existe
             self.conn.execute('''
-                CREATE TABLE products (
+                CREATE TABLE IF NOT EXISTS products (
                     id INTEGER PRIMARY KEY,
                     nombre TEXT NOT NULL,
                     proveedor TEXT NOT NULL,
@@ -29,8 +27,8 @@ class Inventory:
             ''')
 
     def add_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp):
-        # Copia la imagen al directorio de imágenes
-        image_filename = os.path.basename(image_path)
+        # Guarda la imagen con el nombre del producto
+        image_filename = f"{nombre.replace(' ', '_')}.png"
         image_dest_path = os.path.join(self.images_dir, image_filename)
         shutil.copy(image_path, image_dest_path)
 
@@ -43,7 +41,7 @@ class Inventory:
     def remove_product(self, lote):
         with self.conn:
             self.conn.execute('''
-                DELETE FROM products WHERE lote = ?
+                DELETE FROM products WHERE nombre,lote = ?
             ''', (lote.upper(),))
 
     def list_products(self):
@@ -53,12 +51,14 @@ class Inventory:
             ''')
             return cursor.fetchall()
 
-    def find_product(self, lote):
+    def find_product(self, search_term):
+        search_term = f"%{search_term.upper()}%"
         with self.conn:
             cursor = self.conn.execute('''
-                SELECT nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path FROM products WHERE lote = ?
-            ''', (lote.upper(),))
-            return cursor.fetchone()
+                SELECT nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path FROM products
+                WHERE nombre LIKE ? OR proveedor LIKE ? OR fecha_caducidad LIKE ? OR lote LIKE ?
+            ''', (search_term, search_term, search_term, search_term))
+            return cursor.fetchall()
 
     def close(self):
         self.conn.close()
