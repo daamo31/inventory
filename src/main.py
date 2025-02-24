@@ -6,11 +6,13 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.image import Image
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.scrollview import ScrollView
 from camera import CameraWidget
 from inventory import Inventory
-from kivy.clock import Clock
+from datetime import datetime
+from kivymd.app import MDApp
+from kivymd.uix.datatables import MDDataTable
+from kivy.metrics import dp
+from kivy.uix.image import AsyncImage
 
 class MainMenuScreen(Screen):
     def __init__(self, **kwargs):
@@ -101,32 +103,60 @@ class ViewInventoryScreen(Screen):
         search_layout.add_widget(search_button)
         layout.add_widget(search_layout)
 
-        self.scroll_view = ScrollView(size_hint=(1, 0.8))
-        self.grid_layout = GridLayout(cols=7, size_hint_y=None)
-        self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
-        self.scroll_view.add_widget(self.grid_layout)
-        layout.add_widget(self.scroll_view)
+        self.data_table = MDDataTable(
+            size_hint=(1, 0.8),
+            use_pagination=True,
+            column_data=[
+                ("Foto", dp(30)),
+                ("Nombre", dp(30)),
+                ("Proveedor", dp(30)),
+                ("Fecha", dp(30)),
+                ("Lote", dp(30)),
+                ("Coste", dp(30)),
+                ("PVP", dp(30)),
+            ],
+        )
+        layout.add_widget(self.data_table)
 
         back_button = Button(text='Atrás', size_hint=(1, 0.1))
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
         self.add_widget(layout)
+        self.sort_order = {
+            'Fecha': True,
+            'Coste': True,
+            'PVP': True
+        }
 
     def on_enter(self):
         self.display_products(self.manager.inventory.list_products())
 
     def display_products(self, products):
-        self.grid_layout.clear_widgets()
-        headers = ['Foto', 'Nombre', 'Proveedor', 'Fecha', 'Lote', 'Coste', 'PVP']
-        for header in headers:
-            self.grid_layout.add_widget(Label(text=header, bold=True))
-
+        table_data = []
         for product in products:
-            image = Image(source=product[6], size_hint_y=None, height=100)
-            self.grid_layout.add_widget(image)
-            for detail in product[:6]:
-                self.grid_layout.add_widget(Label(text=str(detail)))
+            image_widget = AsyncImage(source=product[6], size_hint=(None, None), size=(dp(30), dp(30)))
+            table_data.append((
+                image_widget,  # Foto
+                product[0],  # Nombre
+                product[1],  # Proveedor
+                product[2],  # Fecha
+                product[3],  # Lote
+                product[4],  # Coste
+                product[5],  # PVP
+            ))
+        self.data_table.row_data = table_data
+
+    def sort_by_column(self, column):
+        products = self.manager.inventory.list_products()
+        if column == 'Fecha':
+            products.sort(key=lambda x: datetime.strptime(x[2], "%d/%m/%Y"), reverse=not self.sort_order[column])
+        elif column == 'Coste':
+            products.sort(key=lambda x: x[4], reverse=not self.sort_order[column])
+        elif column == 'PVP':
+            products.sort(key=lambda x: x[5], reverse=not self.sort_order[column])
+        self.sort_order[column] = not self.sort_order[column]
+        self.display_products(products)
 
     def search_product(self, instance):
         query = self.search_input.text.strip().upper()
@@ -566,7 +596,7 @@ class CameraScreen(Screen):
         else:
             self.info_label.text = "No se pudieron extraer datos de la imagen"
 
-class MainApp(App):
+class MainApp(MDApp):
     def build(self):
         self.title = 'Inventario'
         self.inventory = Inventory()
