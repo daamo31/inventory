@@ -41,7 +41,7 @@ class Inventory:
     def remove_product(self, lote):
         with self.conn:
             self.conn.execute('''
-                DELETE FROM products WHERE nombre,lote = ?
+                DELETE FROM products WHERE lote = ?
             ''', (lote.upper(),))
 
     def list_products(self):
