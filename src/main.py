@@ -11,8 +11,10 @@ from inventory import Inventory
 from datetime import datetime
 from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.metrics import dp
 from kivy.uix.image import AsyncImage
+from kivy.uix.gridlayout import GridLayout
 
 class MainMenuScreen(Screen):
     def __init__(self, **kwargs):
@@ -90,9 +92,11 @@ class InventoryScreen(Screen):
         self.manager.current = 'main_menu'
 
 
+
 class ViewInventoryScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, inventory, **kwargs):
         super(ViewInventoryScreen, self).__init__(**kwargs)
+        self.inventory = inventory
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         search_layout = BoxLayout(size_hint=(1, 0.1), spacing=10)
@@ -103,72 +107,86 @@ class ViewInventoryScreen(Screen):
         search_layout.add_widget(search_button)
         layout.add_widget(search_layout)
 
+        # 📊 Tabla con datos
         self.data_table = MDDataTable(
             size_hint=(1, 0.8),
             use_pagination=True,
+            check=False,  # No usar checkboxes
             column_data=[
-                ("Foto", dp(30)),
                 ("Nombre", dp(30)),
                 ("Proveedor", dp(30)),
-                ("Fecha", dp(30)),
+                ("Fecha", dp(30)),  # ✅ Habilitar ordenación
                 ("Lote", dp(30)),
                 ("Coste", dp(30)),
                 ("PVP", dp(30)),
             ],
+            row_data=[],
         )
+        self.data_table.bind(on_row_press=self.on_column_press)  # 🖱 Detectar clics en la cabecera
         layout.add_widget(self.data_table)
 
+        # 🔙 Botón Atrás
         back_button = Button(text='Atrás', size_hint=(1, 0.1))
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
         self.add_widget(layout)
-        self.sort_order = {
-            'Fecha': True,
-            'Coste': True,
-            'PVP': True
-        }
+
+        # 🔀 Control de ordenación
+        self.sort_order = {'Fecha': True, 'Coste': True, 'PVP': True}
 
     def on_enter(self):
-        self.display_products(self.manager.inventory.list_products())
+        """Actualizar productos al entrar a la pantalla."""
+        self.display_products(self.inventory.list_products())
 
     def display_products(self, products):
-        table_data = []
-        for product in products:
-            image_widget = AsyncImage(source=product[6], size_hint=(None, None), size=(dp(30), dp(30)))
-            table_data.append((
-                image_widget,  # Foto
+        """Mostrar los productos en la tabla."""
+        table_data = [
+            (
                 product[0],  # Nombre
                 product[1],  # Proveedor
                 product[2],  # Fecha
                 product[3],  # Lote
                 product[4],  # Coste
                 product[5],  # PVP
-            ))
+            )
+            for product in products
+        ]
         self.data_table.row_data = table_data
 
     def sort_by_column(self, column):
-        products = self.manager.inventory.list_products()
+        """Ordenar la tabla al hacer clic en una columna."""
+        products = self.inventory.list_products()
         if column == 'Fecha':
             products.sort(key=lambda x: datetime.strptime(x[2], "%d/%m/%Y"), reverse=not self.sort_order[column])
         elif column == 'Coste':
-            products.sort(key=lambda x: x[4], reverse=not self.sort_order[column])
+            products.sort(key=lambda x: float(x[4]), reverse=not self.sort_order[column])
         elif column == 'PVP':
-            products.sort(key=lambda x: x[5], reverse=not self.sort_order[column])
+            products.sort(key=lambda x: float(x[5]), reverse=not self.sort_order[column])
+
         self.sort_order[column] = not self.sort_order[column]
         self.display_products(products)
 
+    def on_column_press(self, instance_table, instance_row):
+        """Detectar clic en la cabecera para ordenar columnas."""
+        column_index = instance_row.index
+        column_name = ["Nombre", "Proveedor", "Fecha", "Lote", "Coste", "PVP"][column_index]
+
+        if column_name in self.sort_order:
+            self.sort_by_column(column_name)
+
     def search_product(self, instance):
+        """Filtrar productos por búsqueda."""
         query = self.search_input.text.strip().upper()
         if query:
-            filtered_products = self.manager.inventory.find_product(query)
+            filtered_products = self.inventory.find_product(query)
             self.display_products(filtered_products)
         else:
-            self.display_products(self.manager.inventory.list_products())
+            self.display_products(self.inventory.list_products())
 
     def go_back(self, instance):
+        """Regresar a la pantalla anterior."""
         self.manager.current = 'inventory'
-
 
 class AddProductPhotoScreen(Screen):
     def __init__(self, **kwargs):
@@ -607,7 +625,7 @@ class MainApp(MDApp):
         sm.add_widget(MainMenuScreen(name='main_menu'))
         sm.add_widget(CameraScreen(name='camera'))
         sm.add_widget(InventoryScreen(name='inventory'))
-        sm.add_widget(ViewInventoryScreen(name='view_inventory'))
+        sm.add_widget(ViewInventoryScreen(inventory=self.inventory, name='view_inventory'))
         sm.add_widget(AddProductPhotoScreen(name='add_product_photo'))
         sm.add_widget(AddProductNameScreen(name='add_product_name'))
         sm.add_widget(AddProductProveedorScreen(name='add_product_proveedor'))
