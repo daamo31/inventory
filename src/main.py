@@ -56,17 +56,13 @@ class InventoryScreen(Screen):
         view_button.bind(on_press=self.view_inventory)
         layout.add_widget(view_button)
 
-        add_button = Button(text='Añadir Producto', size_hint=(1, 0.2))
+        add_button = Button(text='Añadir nuevo producto', size_hint=(1, 0.2))
         add_button.bind(on_press=self.add_product)
         layout.add_widget(add_button)
 
-        modify_button = Button(text='Modificar Producto', size_hint=(1, 0.2))
-        modify_button.bind(on_press=self.modify_product)
-        layout.add_widget(modify_button)
-
-        delete_button = Button(text='Eliminar Producto', size_hint=(1, 0.2))
-        delete_button.bind(on_press=self.delete_product)
-        layout.add_widget(delete_button)
+        add_existing_button = Button(text='Añadir Lote a Producto Existente', size_hint=(1, 0.2))
+        add_existing_button.bind(on_press=self.add_existing_product_lote)
+        layout.add_widget(add_existing_button)
 
         back_button = Button(text='Atrás', size_hint=(1, 0.2))
         back_button.bind(on_press=self.go_back)
@@ -80,22 +76,18 @@ class InventoryScreen(Screen):
     def add_product(self, instance):
         self.manager.current = 'add_product_photo'
 
-    def modify_product(self, instance):
-        self.manager.current = 'modify_product'
-
-    def delete_product(self, instance):
-        self.manager.current = 'delete_product'
+    def add_existing_product_lote(self, instance):
+        self.manager.current = 'add_existing_product_lote'
 
     def go_back(self, instance):
         self.manager.current = 'main_menu'
-
 
 
 class ViewInventoryScreen(Screen):
     def __init__(self, inventory, **kwargs):
         super(ViewInventoryScreen, self).__init__(**kwargs)
         self.inventory = inventory
-        self.headers = ['Foto', 'Nombre', 'Proveedor', 'Fecha', 'Lote', 'Coste', 'PVP']
+        self.headers = ['Foto', 'Nombre', 'Proveedor', 'Fecha', 'Lote', 'Coste', 'PVP', 'Acciones']
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         search_layout = BoxLayout(size_hint=(1, 0.1), spacing=10)
@@ -107,7 +99,7 @@ class ViewInventoryScreen(Screen):
         layout.add_widget(search_layout)
 
         self.scroll_view = ScrollView(size_hint=(1, 0.8))
-        self.grid_layout = GridLayout(cols=7, size_hint_y=None)
+        self.grid_layout = GridLayout(cols=8, size_hint_y=None)
         self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)
@@ -144,6 +136,9 @@ class ViewInventoryScreen(Screen):
             for detail in product[:6]:
                 text_input = TextInput(text=str(detail), size_hint_y=None, height=40, multiline=False)
                 self.grid_layout.add_widget(text_input)
+            delete_button = Button(text='Eliminar', size_hint_y=None, height=40)
+            delete_button.bind(on_press=lambda instance, lote=product[3]: self.delete_product(lote))
+            self.grid_layout.add_widget(delete_button)
 
     def sort_by_column(self, instance):
         column = instance.text
@@ -170,7 +165,7 @@ class ViewInventoryScreen(Screen):
     def save_changes(self, instance):
         children = self.grid_layout.children[:]
         children.reverse()
-        for i in range(0, len(children), 7):
+        for i in range(0, len(children), 8):
             image_widget = children[i]
             if isinstance(image_widget, Image):
                 image_path = image_widget.source
@@ -183,6 +178,10 @@ class ViewInventoryScreen(Screen):
             coste = float(children[i + 5].text.strip())
             pvp = float(children[i + 6].text.strip())
             self.inventory.update_product(image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
+        self.display_products(self.inventory.list_products())
+
+    def delete_product(self, lote):
+        self.inventory.remove_product(lote)
         self.display_products(self.inventory.list_products())
 
     def go_back(self, instance):
@@ -614,6 +613,69 @@ class CameraScreen(Screen):
         else:
             self.info_label.text = "No se pudieron extraer datos de la imagen"
 
+class AddExistingProductLoteScreen(Screen):
+    def __init__(self, inventory, **kwargs):
+        super(AddExistingProductLoteScreen, self).__init__(**kwargs)
+        self.inventory = inventory
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+
+        self.product_spinner = Spinner(text='Seleccionar Producto', size_hint=(1, 0.1))
+        self.product_spinner.bind(text=self.update_product_info)
+        layout.add_widget(self.product_spinner)
+
+        self.product_info_label = Label(text='Nombre del Producto y Proveedor', size_hint=(1, 0.1))
+        layout.add_widget(self.product_info_label)
+
+        self.camera_widget = CameraWidget(size_hint=(1, 0.5))
+        layout.add_widget(self.camera_widget)
+
+        capture_button = Button(text='Capturar Lote y Fecha', size_hint=(1, 0.2))
+        capture_button.bind(on_press=self.capture_lote_image)
+        layout.add_widget(capture_button)
+
+        save_button = Button(text='Guardar', size_hint=(1, 0.2))
+        save_button.bind(on_press=self.save_product)
+        layout.add_widget(save_button)
+
+        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button.bind(on_press=self.go_back)
+        layout.add_widget(back_button)
+
+        self.add_widget(layout)
+
+    def on_enter(self):
+        products = self.inventory.list_products()
+        self.product_spinner.values = [f"{product[0]} ({product[1]})" for product in products]
+        
+
+    def on_leave(self):
+        self.camera_widget.stop_camera()
+
+    def update_product_info(self, text):
+        product_name = text.split(' (')[0]
+        product = self.inventory.find_product(product_name)[0]
+        nombre, proveedor = product
+        self.product_info_label.text = f"Nombre: {nombre}, Proveedor: {proveedor}"
+
+    def capture_lote_image(self):
+        image_path = self.camera_widget.capture()
+        if image_path:
+            self.captured_image_path = image_path
+
+    def save_product(self):
+        selected_product = self.product_spinner.text
+        if selected_product and hasattr(self, 'captured_image_path'):
+            product_name = selected_product.split(' (')[0]
+            product = self.inventory.find_product(product_name)[0]
+            nombre, proveedor, fecha_caducidad, lote, coste, pvp = product
+            fecha_caducidad = self.camera_widget.info_label.text.split(',')[0].strip()
+            lote = self.camera_widget.info_label.text.split(',')[1].strip()
+            self.inventory.add_product(self.captured_image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
+            self.manager.current = 'inventory'
+
+    def go_back(self):
+        self.manager.current = 'inventory'
+
 class MainApp(MDApp):
     def build(self):
         self.title = 'Inventario'
@@ -631,6 +693,7 @@ class MainApp(MDApp):
         sm.add_widget(AddProductProveedorScreen(name='add_product_proveedor'))
         sm.add_widget(AddProductLoteScreen(name='add_product_lote'))
         sm.add_widget(AddProductPriceScreen(name='add_product_price'))
+        sm.add_widget(AddExistingProductLoteScreen(inventory=self.inventory, name='add_existing_product_lote'))
         sm.add_widget(ModifyProductScreen(name='modify_product'))
         sm.add_widget(DeleteProductScreen(name='delete_product'))
 
@@ -641,3 +704,5 @@ class MainApp(MDApp):
 
 if __name__ == '__main__':
     MainApp().run()
+
+
