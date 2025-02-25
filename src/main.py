@@ -116,6 +116,10 @@ class ViewInventoryScreen(Screen):
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
+        save_button = Button(text='Guardar Cambios', size_hint=(1, 0.1))
+        save_button.bind(on_press=self.save_changes)
+        layout.add_widget(save_button)
+
         self.add_widget(layout)
         self.sort_order = {
             'Nombre': True,
@@ -138,7 +142,8 @@ class ViewInventoryScreen(Screen):
             image = Image(source=product[6], size_hint_y=None, height=100)
             self.grid_layout.add_widget(image)
             for detail in product[:6]:
-                self.grid_layout.add_widget(Label(text=str(detail), size_hint_y=None, height=40, color=(0, 0, 0, 1)))
+                text_input = TextInput(text=str(detail), size_hint_y=None, height=40, multiline=False)
+                self.grid_layout.add_widget(text_input)
 
     def sort_by_column(self, instance):
         column = instance.text
@@ -161,6 +166,24 @@ class ViewInventoryScreen(Screen):
             self.display_products(filtered_products)
         else:
             self.display_products(self.inventory.list_products())
+
+    def save_changes(self, instance):
+        children = self.grid_layout.children[:]
+        children.reverse()
+        for i in range(0, len(children), 7):
+            image_widget = children[i]
+            if isinstance(image_widget, Image):
+                image_path = image_widget.source
+            else:
+                continue
+            nombre = children[i + 1].text.strip()
+            proveedor = children[i + 2].text.strip()
+            fecha_caducidad = children[i + 3].text.strip()
+            lote = children[i + 4].text.strip()
+            coste = float(children[i + 5].text.strip())
+            pvp = float(children[i + 6].text.strip())
+            self.inventory.update_product(image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
+        self.display_products(self.inventory.list_products())
 
     def go_back(self, instance):
         self.manager.current = 'inventory'
