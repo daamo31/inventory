@@ -175,9 +175,10 @@ class ViewInventoryScreen(Screen):
             proveedor = children[i + 2].text.strip()
             fecha_caducidad = children[i + 3].text.strip()
             lote = children[i + 4].text.strip()
+            nuevo_lote = children[i + 4].text.strip()  # Permitir la modificación del lote
             coste = float(children[i + 5].text.strip())
             pvp = float(children[i + 6].text.strip())
-            self.inventory.update_product(image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
+            self.inventory.update_product(image_path, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, coste, pvp)
         self.display_products(self.inventory.list_products())
 
     def delete_product(self, lote):
@@ -434,6 +435,7 @@ class ModifyProductScreen(Screen):
         layout.add_widget(self.info_label)
 
         self.product_spinner = Spinner(text='Seleccionar Producto', size_hint=(1, 0.1))
+        self.product_spinner.bind(text=self.update_fields)
         layout.add_widget(self.product_spinner)
 
         self.foto_input = TextInput(hint_text='Nueva ruta de la foto', size_hint=(1, 0.1))
@@ -471,6 +473,17 @@ class ModifyProductScreen(Screen):
         products = self.manager.inventory.list_products()
         self.product_spinner.values = [f"{product[3]}" for product in products]
 
+    def update_fields(self, spinner, text):
+        product = self.manager.inventory.find_product(text)[0]
+        nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path = product
+        self.foto_input.text = image_path
+        self.nombre_input.text = nombre
+        self.proveedor_input.text = proveedor
+        self.fecha_input.text = fecha_caducidad
+        self.lote_input.text = lote
+        self.coste_input.text = str(coste)
+        self.pvp_input.text = str(pvp)
+
     def modify_product(self, instance):
         lote = self.product_spinner.text
         foto = self.foto_input.text.strip()
@@ -482,13 +495,8 @@ class ModifyProductScreen(Screen):
         pvp = self.pvp_input.text.strip()
 
         if foto and nombre and proveedor and fecha_caducidad and nuevo_lote and coste and pvp:
-            product = self.manager.inventory.find_product(lote)
-            if product:
-                self.manager.inventory.remove_product(lote)
-                self.manager.inventory.add_product(foto, nombre, proveedor, fecha_caducidad, nuevo_lote, float(coste), float(pvp))
-                self.info_label.text = 'Producto modificado'
-            else:
-                self.info_label.text = 'Producto no encontrado'
+            self.manager.inventory.update_product(foto, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, float(coste), float(pvp))
+            self.info_label.text = 'Producto modificado'
         else:
             self.info_label.text = 'Todos los campos son obligatorios.'
 
@@ -646,34 +654,34 @@ class AddExistingProductLoteScreen(Screen):
     def on_enter(self):
         products = self.inventory.list_products()
         self.product_spinner.values = [f"{product[0]} ({product[1]})" for product in products]
-        
+        self.camera_widget.start_camera()  # Asegurarse de que la cámara se inicia al entrar en la pantalla
 
     def on_leave(self):
         self.camera_widget.stop_camera()
 
-    def update_product_info(self, text):
+    def update_product_info(self, spinner, text):
         product_name = text.split(' (')[0]
         product = self.inventory.find_product(product_name)[0]
-        nombre, proveedor = product
+        nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path = product
         self.product_info_label.text = f"Nombre: {nombre}, Proveedor: {proveedor}"
 
-    def capture_lote_image(self):
+    def capture_lote_image(self, instance):
         image_path = self.camera_widget.capture()
         if image_path:
             self.captured_image_path = image_path
 
-    def save_product(self):
+    def save_product(self, instance):
         selected_product = self.product_spinner.text
         if selected_product and hasattr(self, 'captured_image_path'):
             product_name = selected_product.split(' (')[0]
             product = self.inventory.find_product(product_name)[0]
-            nombre, proveedor, fecha_caducidad, lote, coste, pvp = product
+            nombre, proveedor, _, _, coste, pvp, _ = product
             fecha_caducidad = self.camera_widget.info_label.text.split(',')[0].strip()
             lote = self.camera_widget.info_label.text.split(',')[1].strip()
             self.inventory.add_product(self.captured_image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
             self.manager.current = 'inventory'
 
-    def go_back(self):
+    def go_back(self, instance):
         self.manager.current = 'inventory'
 
 class MainApp(MDApp):

@@ -38,13 +38,13 @@ class Inventory:
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), lote.upper(), coste, pvp, image_dest_path))
 
-    def update_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp):
+    def update_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, coste, pvp):
         with self.conn:
             self.conn.execute('''
                 UPDATE products
-                SET nombre = ?, proveedor = ?, fecha_caducidad = ?, coste = ?, pvp = ?, image_path = ?
+                SET nombre = ?, proveedor = ?, fecha_caducidad = ?, lote = ?, coste = ?, pvp = ?, image_path = ?
                 WHERE lote = ?
-            ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), coste, pvp, image_path, lote.upper()))
+            ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), nuevo_lote.upper(), coste, pvp, image_path, lote.upper()))
 
     def remove_product(self, lote):
         with self.conn:
