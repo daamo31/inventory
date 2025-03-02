@@ -68,5 +68,10 @@ class Inventory:
             ''', (search_term, search_term, search_term, search_term))
             return cursor.fetchall()
 
+    def save_to_file(self):
+        # Este método no es necesario para SQLite, ya que los cambios se guardan automáticamente.
+        # Sin embargo, si se requiere alguna acción adicional, se puede implementar aquí.
+        pass
+
     def close(self):
         self.conn.close()

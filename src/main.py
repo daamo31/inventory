@@ -87,106 +87,99 @@ class ViewInventoryScreen(Screen):
     def __init__(self, inventory, **kwargs):
         super(ViewInventoryScreen, self).__init__(**kwargs)
         self.inventory = inventory
-        self.headers = ['Foto', 'Nombre', 'Proveedor', 'Fecha', 'Lote', 'Coste', 'PVP', 'Acciones']
+        self.expanded_groups = {}  # Guarda el estado de los grupos
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
+        # Barra de búsqueda
         search_layout = BoxLayout(size_hint=(1, 0.1), spacing=10)
-        self.search_input = TextInput(hint_text='Buscar por nombre, proveedor, fecha de caducidad o lote', size_hint=(0.8, 1))
+        self.search_input = TextInput(hint_text='Buscar producto...', size_hint=(0.8, 1))
         search_button = Button(text='Buscar', size_hint=(0.2, 1))
         search_button.bind(on_press=self.search_product)
         search_layout.add_widget(self.search_input)
         search_layout.add_widget(search_button)
         layout.add_widget(search_layout)
 
+        # Área de scroll
         self.scroll_view = ScrollView(size_hint=(1, 0.8))
-        self.grid_layout = GridLayout(cols=8, size_hint_y=None)
+        self.grid_layout = GridLayout(cols=1, size_hint_y=None)
         self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)
 
+        # Botón Atrás
         back_button = Button(text='Atrás', size_hint=(1, 0.1))
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
+        # Botón Guardar
         save_button = Button(text='Guardar Cambios', size_hint=(1, 0.1))
         save_button.bind(on_press=self.save_changes)
         layout.add_widget(save_button)
 
         self.add_widget(layout)
-        self.sort_order = {
-            'Nombre': True,
-            'Proveedor': True,
-            'Fecha': True,
-            'Lote': True,
-            'Coste': True,
-            'PVP': True
-        }
 
     def on_enter(self):
         self.display_products(self.inventory.list_products())
 
+    def group_products_by_name(self, products):
+        grouped = {}
+        for product in products:
+            name = product[0]  # Suponiendo que el nombre está en la posición 0
+            if name not in grouped:
+                grouped[name] = []
+            grouped[name].append(product)
+        return grouped
+
     def display_products(self, products):
         self.grid_layout.clear_widgets()
-        for header in self.headers:
-            self.grid_layout.add_widget(Button(text=header, size_hint_y=None, height=40, on_press=self.sort_by_column))
+        grouped_products = self.group_products_by_name(products)
 
-        for product in products:
-            image = Image(source=product[6], size_hint_y=None, height=100)
-            self.grid_layout.add_widget(image)
-            for detail in product[:6]:
-                text_input = TextInput(text=str(detail), size_hint_y=None, height=40, multiline=False)
-                self.grid_layout.add_widget(text_input)
-            delete_button = Button(text='Eliminar', size_hint_y=None, height=40)
-            delete_button.bind(on_press=lambda instance, lote=product[3]: self.delete_product(lote))
-            self.grid_layout.add_widget(delete_button)
+        for name, items in grouped_products.items():
+            # Botón del encabezado (nombre del producto)
+            header_button = Button(text=f"{name} ({len(items)})", size_hint_y=None, height=50)
+            header_button.bind(on_press=lambda instance, n=name: self.toggle_group(n))
+            self.grid_layout.add_widget(header_button)
 
-    def sort_by_column(self, instance):
-        column = instance.text
-        products = self.inventory.list_products()
-        if column == 'Fecha':
-            products.sort(key=lambda x: datetime.strptime(x[2], "%d/%m/%Y"), reverse=not self.sort_order[column])
-        elif column == 'Coste':
-            products.sort(key=lambda x: x[4], reverse=not self.sort_order[column])
-        elif column == 'PVP':
-            products.sort(key=lambda x: x[5], reverse=not self.sort_order[column])
-        else:
-            products.sort(key=lambda x: x[self.headers.index(column)], reverse=not self.sort_order[column])
-        self.sort_order[column] = not self.sort_order[column]
-        self.display_products(products)
+            # Si el grupo está expandido, mostrar los productos
+            if self.expanded_groups.get(name, False):
+                for product in items:
+                    product_layout = GridLayout(cols=8, size_hint_y=None, height=100)
+
+                    # Imagen del producto
+                    image = Image(source=product[6] if product[6] else "default_image.png", size_hint_y=None, height=100)
+                    product_layout.add_widget(image)
+
+                    # Datos del producto
+                    for detail in product[:6]:
+                        text_input = TextInput(text=str(detail), size_hint_y=None, height=40, multiline=False)
+                        product_layout.add_widget(text_input)
+
+                    # Botón de eliminar
+                    delete_button = Button(text='Eliminar', size_hint_y=None, height=40)
+                    delete_button.bind(on_press=lambda instance, lote=product[3]: self.delete_product(lote))
+                    product_layout.add_widget(delete_button)
+
+                    self.grid_layout.add_widget(product_layout)
+
+    def toggle_group(self, name):
+        self.expanded_groups[name] = not self.expanded_groups.get(name, False)
+        self.display_products(self.inventory.list_products())  # Refresca la UI
 
     def search_product(self, instance):
-        query = self.search_input.text.strip().upper()
-        if query:
-            filtered_products = self.inventory.find_product(query)
-            self.display_products(filtered_products)
-        else:
-            self.display_products(self.inventory.list_products())
-
-    def save_changes(self, instance):
-        children = self.grid_layout.children[:]
-        children.reverse()
-        for i in range(0, len(children), 8):
-            image_widget = children[i]
-            if isinstance(image_widget, Image):
-                image_path = image_widget.source
-            else:
-                continue
-            nombre = children[i + 1].text.strip()
-            proveedor = children[i + 2].text.strip()
-            fecha_caducidad = children[i + 3].text.strip()
-            lote = children[i + 4].text.strip()
-            nuevo_lote = children[i + 4].text.strip()  # Permitir la modificación del lote
-            coste = float(children[i + 5].text.strip())
-            pvp = float(children[i + 6].text.strip())
-            self.inventory.update_product(image_path, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, coste, pvp)
-        self.display_products(self.inventory.list_products())
+        query = self.search_input.text.lower()
+        filtered_products = [p for p in self.inventory.list_products() if query in p[0].lower()]
+        self.display_products(filtered_products)
 
     def delete_product(self, lote):
-        self.inventory.remove_product(lote)
+        self.inventory.delete_product(lote)
         self.display_products(self.inventory.list_products())
 
     def go_back(self, instance):
-        self.manager.current = 'inventory'
+        self.manager.current = 'main_menu'
+
+    def save_changes(self, instance):
+        print("Cambios guardados correctamente")
 
 class AddProductPhotoScreen(Screen):
     def __init__(self, **kwargs):
