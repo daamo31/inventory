@@ -8,7 +8,7 @@ from screens.product import (
     AddProductLoteScreen, AddProductPriceScreen, AddExistingProductLoteScreen,
     ModifyProductScreen, DeleteProductScreen
 )
-from screens.camera import CameraScreen
+from screens.camera_screen import CameraScreen
 
 class MainApp(MDApp):
     def build(self):
