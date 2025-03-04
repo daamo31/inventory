@@ -5,6 +5,8 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
+import pandas as pd
+from datetime import datetime
 
 class SalesScreen(Screen):
     def __init__(self, inventory, **kwargs):
@@ -71,12 +73,11 @@ class SalesScreen(Screen):
         self.display_products()
 
     def finalize_sales(self, instance):
-        # Guardar las ventas y la facturación
-        with open('sales_report.txt', 'w') as f:
-            f.write('Ventas:\n')
-            for sale in self.sales:
-                f.write(f'{sale}\n')
-            f.write(f'\nTotal: {self.total_sales}\n')
+        # Guardar las ventas y la facturación en un archivo Excel
+        df = pd.DataFrame(self.sales, columns=['Nombre', 'Proveedor', 'Fecha de Caducidad', 'Lote', 'Coste', 'PVP', 'Imagen'])
+        df['Fecha y Hora'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        df['Total Facturación'] = self.total_sales
+        df.to_excel('sales_report.xlsx', index=False)
 
         # Reiniciar las ventas
         self.sales = []

@@ -244,7 +244,6 @@ class AddProductPriceScreen(Screen):
         self.coste_input.text = ''
         self.pvp_input.text = ''
 
-
 class ModifyProductScreen(Screen):
     def __init__(self, **kwargs):
         super(ModifyProductScreen, self).__init__(**kwargs)
@@ -313,9 +312,12 @@ class ModifyProductScreen(Screen):
         coste = self.coste_input.text.strip()
         pvp = self.pvp_input.text.strip()
 
-        if foto and nombre and proveedor and fecha_caducidad and nuevo_lote and coste and pvp:
-            self.manager.inventory.update_product(foto, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, float(coste), float(pvp))
-            self.info_label.text = 'Producto modificado'
+        if nombre and proveedor and fecha_caducidad and nuevo_lote and coste and pvp:
+            try:
+                self.manager.inventory.update_product(foto, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, float(coste), float(pvp))
+                self.info_label.text = 'Producto modificado'
+            except Exception as e:
+                self.info_label.text = f'Error al modificar el producto: {str(e)}'
         else:
             self.info_label.text = 'Todos los campos son obligatorios.'
 

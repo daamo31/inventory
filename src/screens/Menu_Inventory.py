@@ -138,4 +138,5 @@ class ViewInventoryScreen(Screen):
         self.manager.current = 'main_menu'
 
     def save_changes(self, instance):
+        # Implementa la lógica para guardar los cambios realizados en la pantalla de inventario
         print("Cambios guardados correctamente")
