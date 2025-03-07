@@ -131,7 +131,7 @@ class ViewInventoryScreen(Screen):
         self.display_products(filtered_products)
 
     def delete_product(self, lote):
-        self.inventory.delete_product(lote)
+        self.inventory.remove_product(lote)
         self.display_products(self.inventory.list_products())
 
     def go_back(self, instance):

@@ -37,6 +37,7 @@ class Inventory:
                 INSERT INTO products (nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), lote.upper(), coste, pvp, image_dest_path))
+
     def update_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, coste, pvp):
         # Guarda la nueva imagen si se ha proporcionado una nueva ruta
         if image_path:
