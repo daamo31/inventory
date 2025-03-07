@@ -11,6 +11,7 @@ from screens.product import (
 from screens.camera_screen import CameraScreen
 from screens.sales import SalesScreen
 from screens.reports import ReportsScreen
+from screens.download_reports import DownloadReportsScreen
 
 class MainApp(MDApp):
     def build(self):
@@ -34,6 +35,7 @@ class MainApp(MDApp):
         sm.add_widget(DeleteProductScreen(name='delete_product'))
         sm.add_widget(SalesScreen(inventory=self.inventory, name='sales'))
         sm.add_widget(ReportsScreen(name='reports'))
+        sm.add_widget(DownloadReportsScreen(name='download_reports'))
 
         return sm
 

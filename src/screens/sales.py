@@ -7,6 +7,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
 import pandas as pd
 from datetime import datetime
+import os
 
 class SalesScreen(Screen):
     def __init__(self, inventory, **kwargs):
@@ -80,10 +81,15 @@ class SalesScreen(Screen):
         df['Fecha y Hora'] = fecha_hora
 
         # Añadir una fila para el total de facturación
-        total_row = pd.DataFrame([['', '', '', 'Total', self.total_sales, '', '']], columns=df.columns)
+        total_row = pd.DataFrame([['', '', '', 'Total', self.total_sales, fecha_hora]], columns=df.columns)
         df = pd.concat([df, total_row], ignore_index=True)
 
-        df.to_excel(f'sales_report_{fecha_hora}.xlsx', index=False)
+        # Crear la carpeta 'informes' si no existe
+        informes_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'informes')
+        os.makedirs(informes_dir, exist_ok=True)
+
+        # Guardar el archivo Excel en la carpeta 'informes'
+        df.to_excel(os.path.join(informes_dir, f'sales_report_{fecha_hora}.xlsx'), index=False)
 
         # Reiniciar las ventas
         self.sales = []
