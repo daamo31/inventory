@@ -74,10 +74,16 @@ class SalesScreen(Screen):
 
     def finalize_sales(self, instance):
         # Guardar las ventas y la facturación en un archivo Excel
-        df = pd.DataFrame(self.sales, columns=['Nombre', 'Proveedor', 'Fecha de Caducidad', 'Lote', 'Coste', 'PVP', 'Imagen'])
-        df['Fecha y Hora'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        df['Total Facturación'] = self.total_sales
-        df.to_excel('sales_report.xlsx', index=False)
+        sales_data = [(nombre, proveedor, fecha_caducidad, lote, pvp) for nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path in self.sales]
+        df = pd.DataFrame(sales_data, columns=['Nombre', 'Proveedor', 'Fecha de Caducidad', 'Lote', 'PVP'])
+        fecha_hora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        df['Fecha y Hora'] = fecha_hora
+
+        # Añadir una fila para el total de facturación
+        total_row = pd.DataFrame([['', '', '', 'Total', self.total_sales, '', '']], columns=df.columns)
+        df = pd.concat([df, total_row], ignore_index=True)
+
+        df.to_excel(f'sales_report_{fecha_hora}.xlsx', index=False)
 
         # Reiniciar las ventas
         self.sales = []
