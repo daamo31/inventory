@@ -75,6 +75,20 @@ class CameraWidget(BoxLayout):
             return image_path
         return None
 
+    def capture_product_image(self, *args):
+        """Captura una imagen del producto sin procesamiento OCR."""
+        if self.capture_device:
+            ret, frame = self.capture_device.read()
+            if not ret:
+                self.info_label.text = "Error al capturar la imagen"
+                return None
+
+            image_path = 'captured_product_image.png'
+            cv2.imwrite(image_path, frame)
+            self.info_label.text = "Imagen del producto capturada"
+            return image_path
+        return None
+
     def preprocess_and_ocr(self, image_path):
         """Preprocesa la imagen y extrae texto con OCR."""
         # 1. Abre la imagen con OpenCV (para mejor manejo de escala de grises)

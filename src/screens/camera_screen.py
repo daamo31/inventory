@@ -11,7 +11,7 @@ class CameraScreen(Screen):
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         # 📸 La cámara ocupa la mayor parte de la pantalla
-        self.camera_widget = CameraWidget(size_hint=(1, 5))  
+        self.camera_widget = CameraWidget(size_hint=(1, 2))  # Aumentar el tamaño de la cámara
         layout.add_widget(self.camera_widget)
 
         # 📌 Etiqueta de información (solo una vez)
@@ -23,7 +23,7 @@ class CameraScreen(Screen):
         layout.add_widget(self.info_input)
 
         # 📍 Botones alineados en la parte inferior
-        button_layout = BoxLayout(size_hint=(1, 0.15), spacing=10)
+        button_layout = BoxLayout(size_hint=(1, 0.1), spacing=10)
 
         back_button = Button(text='Atrás')
         back_button.bind(on_press=self.go_back)

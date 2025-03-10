@@ -15,18 +15,18 @@ class AddProductPhotoScreen(Screen):
         self.info_label = Label(text='Capturar Foto del Producto:')
         layout.add_widget(self.info_label)
 
-        self.camera_widget = CameraWidget(size_hint=(1, 0.5))
+        self.camera_widget = CameraWidget(size_hint=(1, 0.7))  # Aumentar el tamaño de la cámara
         layout.add_widget(self.camera_widget)
 
-        capture_button = Button(text='Capturar', size_hint=(1, 0.2))
+        capture_button = Button(text='Capturar', size_hint=(1, 0.1))
         capture_button.bind(on_press=self.capture_image)
         layout.add_widget(capture_button)
 
-        next_button = Button(text='Siguiente', size_hint=(1, 0.2))
+        next_button = Button(text='Siguiente', size_hint=(1, 0.1))
         next_button.bind(on_press=self.go_to_next)
         layout.add_widget(next_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = Button(text='Atrás', size_hint=(1, 0.1))
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -40,7 +40,7 @@ class AddProductPhotoScreen(Screen):
         self.camera_widget.stop_camera()
 
     def capture_image(self, instance):
-        image_path = self.camera_widget.capture()
+        image_path = self.camera_widget.capture_product_image()  # Usar el nuevo método
         if image_path:
             self.manager.get_screen('add_product_name').update_image_preview(image_path)
             self.manager.get_screen('add_product_photo').captured_image_path = image_path
@@ -143,18 +143,18 @@ class AddProductLoteScreen(Screen):
         self.info_label = Label(text='Capturar Lote y Fecha de Caducidad:')
         layout.add_widget(self.info_label)
 
-        self.camera_widget = CameraWidget(size_hint=(1, 0.5))
+        self.camera_widget = CameraWidget(size_hint=(1, 3))  # Aumentar el tamaño de la cámara
         layout.add_widget(self.camera_widget)
 
-        capture_button = Button(text='Capturar Lote', size_hint=(1, 0.2))
+        capture_button = Button(text='Capturar Lote', size_hint=(1, 0.1))
         capture_button.bind(on_press=self.capture_lote_image)
         layout.add_widget(capture_button)
 
-        next_button = Button(text='Siguiente', size_hint=(1, 0.2))
+        next_button = Button(text='Siguiente', size_hint=(1, 0.1))
         next_button.bind(on_press=self.go_to_next)
         layout.add_widget(next_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = Button(text='Atrás', size_hint=(1, 0.1))
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -218,7 +218,7 @@ class AddProductPriceScreen(Screen):
         lote = self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')[1].strip() if len(self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')) > 1 else 'N/A'
         coste = self.coste_input.text.strip()
         pvp = self.pvp_input.text.strip()
-        image_path = self.manager.get_screen('add_product_photo').captured_image_path
+        image_path = self.manager.get_screen('add_product_photo').captured_image_path  # Usar la primera foto capturada
 
         if image_path and nombre and proveedor and fecha_caducidad and lote and coste and pvp:
             self.manager.inventory.add_product(image_path, nombre, proveedor, fecha_caducidad, lote, float(coste), float(pvp))

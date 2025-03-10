@@ -96,6 +96,7 @@ class ReportsScreen(Screen):
         filechooser = FileChooserIconView(path=informes_dir, filters=['*.xlsx'], dirselect=False)
         filechooser.bind(on_submit=self.on_file_selected)
         self.add_widget(filechooser)
+        
 
     def go_to_download_screen(self, instance):
         self.manager.current = 'download_reports'
@@ -107,6 +108,7 @@ class ReportsScreen(Screen):
             shutil.copy(selected_file, downloads_dir)
             print(f"Archivo descargado en: {downloads_dir}")
         self.remove_widget(filechooser)
+        print('Infome descargado', selected_file)
 
     def go_back(self, instance):
         self.manager.current = 'main_menu'
