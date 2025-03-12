@@ -135,14 +135,14 @@ class CameraWidget(BoxLayout):
         """Extrae fecha de caducidad y número de lote del texto OCR."""
         data = {}
 
-        # Patrón de fecha mejorado para detectar diferentes formatos
-        fecha_pattern = re.compile(r'\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}[-/]\d{2}|\d{2}[-/]\d{4})\b')
+        # Patrón de fecha mejorado para detectar diferentes formatos, incluyendo letras
+        fecha_pattern = re.compile(r'\b(\d{1,2}[-/](?:\d{1,2}|\w{3})[-/]\d{2,4}|\d{1,2}[-/]\d{2}|\d{2}[-/]\d{4})\b')
         lote_pattern = re.compile(r'\b[L]?\d+[A-Za-z]?\d*[A-Za-z]?\d*\b')
 
         fecha_match = fecha_pattern.search(text)
         if fecha_match:
             fecha_str = fecha_match.group(1)
-            formatos = ["%d-%m-%Y", "%d/%m/%Y", "%d-%m-%y", "%d/%m/%y", "%m-%Y", "%m/%Y"]
+            formatos = ["%d-%m-%Y", "%d/%m/%Y", "%d-%m-%y", "%d/%m/%y", "%m-%Y", "%m/%Y", "%d-%b-%Y", "%d/%b/%Y"]
             for fmt in formatos:
                 try:
                     fecha = datetime.strptime(fecha_str, fmt).strftime("%d/%m/%Y")

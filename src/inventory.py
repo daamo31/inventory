@@ -39,7 +39,7 @@ class Inventory:
             ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), lote.upper(), coste, pvp, image_dest_path))
 
     def update_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, coste, pvp):
-    # Verificar si el producto existe
+        # Verificar si el producto existe
         product = self.find_product(lote.strip().upper())
         if not product:
             raise ValueError(f"Producto con lote {lote} no encontrado")
@@ -52,7 +52,7 @@ class Inventory:
                 UPDATE products
                 SET nombre = ?, proveedor = ?, fecha_caducidad = ?, lote = ?, coste = ?, pvp = ?, image_path = ?
                 WHERE lote = ?
-            ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), nuevo_lote.upper(), coste, pvp, image_dest_path, lote.strip().upper()))
+            ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), nuevo_lote.strip().upper(), coste, pvp, image_dest_path, lote.strip().upper()))
 
         print(f"Producto {nombre} actualizado correctamente en la base de datos.")
 

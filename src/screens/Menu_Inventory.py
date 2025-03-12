@@ -145,12 +145,13 @@ class ViewInventoryScreen(Screen):
                 proveedor = proveedor_input.text.strip()
                 fecha_caducidad = fecha_input.text.strip()
                 lote = lote_input.text.strip()
+                nuevo_lote = lote_input.text.strip()  # Asegurarse de que el nuevo lote se toma del campo de entrada
                 coste = float(coste_input.text.strip())
                 pvp = float(pvp_input.text.strip())
                 image_path = image_widget.source
 
                 try:
-                    self.inventory.update_product(image_path, nombre, proveedor, fecha_caducidad, lote, lote, coste, pvp)
+                    self.inventory.update_product(image_path, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, coste, pvp)
                 except ValueError as e:
                     print(f"Error al guardar cambios: {e}")
         print("Cambios guardados correctamente")

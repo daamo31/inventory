@@ -10,6 +10,7 @@ from camera import CameraWidget
 class AddProductPhotoScreen(Screen):
     def __init__(self, **kwargs):
         super(AddProductPhotoScreen, self).__init__(**kwargs)
+        self.captured_image_path = None  # Inicializar el atributo
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Capturar Foto del Producto:')
@@ -43,7 +44,7 @@ class AddProductPhotoScreen(Screen):
         image_path = self.camera_widget.capture_product_image()  # Usar el nuevo método
         if image_path:
             self.manager.get_screen('add_product_name').update_image_preview(image_path)
-            self.manager.get_screen('add_product_photo').captured_image_path = image_path
+            self.captured_image_path = image_path  # Guardar la imagen capturada
 
     def go_to_next(self, instance):
         self.manager.current = 'add_product_name'
@@ -150,6 +151,13 @@ class AddProductLoteScreen(Screen):
         capture_button.bind(on_press=self.capture_lote_image)
         layout.add_widget(capture_button)
 
+        # Campos de entrada manual para lote y fecha de caducidad
+        self.fecha_input = TextInput(hint_text='Fecha de Caducidad (dd/mm/yyyy)', size_hint=(1, 0.1))
+        layout.add_widget(self.fecha_input)
+
+        self.lote_input = TextInput(hint_text='Lote', size_hint=(1, 0.1))
+        layout.add_widget(self.lote_input)
+
         next_button = Button(text='Siguiente', size_hint=(1, 0.1))
         next_button.bind(on_press=self.go_to_next)
         layout.add_widget(next_button)
@@ -170,12 +178,18 @@ class AddProductLoteScreen(Screen):
     def capture_lote_image(self, instance):
         image_path = self.camera_widget.capture()
         if image_path:
-            self.manager.get_screen('add_product_price').update_info_input({
-                'fecha_caducidad': self.camera_widget.info_label.text.split(',')[0].strip() if len(self.camera_widget.info_label.text.split(',')) > 1 else 'N/A',
-                'lote': self.camera_widget.info_label.text.split(',')[1].strip() if len(self.camera_widget.info_label.text.split(',')) > 1 else 'N/A'
-            })
+            data = {
+                'fecha_caducidad': self.camera_widget.info_label.text.split(',')[0].strip() if len(self.camera_widget.info_label.text.split(',')) > 1 else '',
+                'lote': self.camera_widget.info_label.text.split(',')[1].strip() if len(self.camera_widget.info_label.text.split(',')) > 1 else ''
+            }
+            self.update_info_input(data)
 
     def go_to_next(self, instance):
+        # Usar los valores manuales si están presentes
+        fecha_caducidad = self.fecha_input.text.strip() or self.camera_widget.info_label.text.split(',')[0].strip()
+        lote = self.lote_input.text.strip() or self.camera_widget.info_label.text.split(',')[1].strip()
+        data = {'fecha_caducidad': fecha_caducidad, 'lote': lote}
+        self.manager.get_screen('add_product_price').update_info_input(data)
         self.manager.current = 'add_product_price'
 
     def go_back(self, instance):
@@ -184,7 +198,9 @@ class AddProductLoteScreen(Screen):
     def update_info_input(self, data):
         """Actualiza los campos de entrada de información en la interfaz de usuario."""
         if data:
-            self.camera_widget.info_label.text = f"{data.get('fecha_caducidad', 'N/A')}, {data.get('lote', 'N/A')}"
+            self.fecha_input.text = data.get('fecha_caducidad', '')
+            self.lote_input.text = data.get('lote', '')
+            self.camera_widget.info_label.text = f"{data.get('fecha_caducidad', '')}, {data.get('lote', '')}"
 
 
 class AddProductPriceScreen(Screen):
@@ -214,10 +230,10 @@ class AddProductPriceScreen(Screen):
     def save_product(self, instance):
         nombre = self.manager.get_screen('add_product_name').nombre_input.text.strip()
         proveedor = self.manager.get_screen('add_product_proveedor').proveedor_input.text.strip()
-        fecha_caducidad = self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')[0].strip() if len(self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')) > 1 else 'N/A'
-        lote = self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')[1].strip() if len(self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')) > 1 else 'N/A'
-        coste = self.coste_input.text.strip()
-        pvp = self.pvp_input.text.strip()
+        fecha_caducidad = self.manager.get_screen('add_product_lote').fecha_input.text.strip() or self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')[0].strip()
+        lote = self.manager.get_screen('add_product_lote').lote_input.text.strip() or self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')[1].strip()
+        coste = self.coste_input.text.strip().replace(',', '.')
+        pvp = self.pvp_input.text.strip().replace(',', '.')
         image_path = self.manager.get_screen('add_product_photo').captured_image_path  # Usar la primera foto capturada
 
         if image_path and nombre and proveedor and fecha_caducidad and lote and coste and pvp:
