@@ -32,11 +32,14 @@ class Inventory:
         image_dest_path = os.path.join(self.images_dir, image_filename)
         shutil.copy(image_path, image_dest_path)
 
-        with self.conn:
-            self.conn.execute('''
-                INSERT INTO products (nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), lote.upper(), coste, pvp, image_dest_path))
+        try:
+            with self.conn:
+                self.conn.execute('''
+                    INSERT INTO products (nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (nombre.upper(), proveedor.upper(), fecha_caducidad.upper(), lote.upper(), coste, pvp, image_dest_path))
+        except sqlite3.IntegrityError:
+            raise ValueError(f"El producto con el lote {lote} ya existe.")
 
     def update_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, coste, pvp):
         # Verificar si el producto existe
