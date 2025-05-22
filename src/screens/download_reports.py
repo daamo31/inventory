@@ -2,11 +2,11 @@ import os
 import glob
 import shutil
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
+from kivymd.uix.button import MDButton, MDButtonText
 
 class DownloadReportsScreen(Screen):
     def __init__(self, **kwargs):
@@ -21,7 +21,10 @@ class DownloadReportsScreen(Screen):
         layout.add_widget(self.scroll_view)
 
         # Botón de "Atrás"
-        back_button = Button(text='Atrás', size_hint=(1, 0.1))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.1)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -39,7 +42,10 @@ class DownloadReportsScreen(Screen):
         else:
             for file in excel_files:
                 file_name = os.path.basename(file)
-                file_button = Button(text=file_name, size_hint_y=None, height=40)
+                file_button = MDButton(
+                    MDButtonText(text=file_name),
+                    size_hint_y=None, height=40
+                )
                 file_button.bind(on_press=lambda instance, f=file: self.download_file(f))
                 self.grid_layout.add_widget(file_button)
 

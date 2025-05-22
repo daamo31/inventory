@@ -2,13 +2,13 @@ import os
 import glob
 import shutil
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.spinner import Spinner
 from kivy.uix.filechooser import FileChooserIconView
+from kivymd.uix.button import MDButton, MDButtonText
 import pandas as pd
 
 class ReportsScreen(Screen):
@@ -29,12 +29,18 @@ class ReportsScreen(Screen):
         layout.add_widget(self.scroll_view)
 
         # Botón para descargar el archivo Excel
-        download_button = Button(text='Descargar Informe', size_hint=(1, 0.1))
+        download_button = MDButton(
+            MDButtonText(text='Descargar Informe'),
+            size_hint=(1, 0.1)
+        )
         download_button.bind(on_press=self.go_to_download_screen)
         layout.add_widget(download_button)
 
         # Botón de "Atrás"
-        back_button = Button(text='Atrás', size_hint=(1, 0.1))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.1)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -97,7 +103,6 @@ class ReportsScreen(Screen):
         filechooser.bind(on_submit=self.on_file_selected)
         self.add_widget(filechooser)
         
-
     def go_to_download_screen(self, instance):
         self.manager.current = 'download_reports'
 

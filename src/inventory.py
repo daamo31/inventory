@@ -3,16 +3,22 @@ import os
 import shutil
 
 class Inventory:
-    def __init__(self, db_path='inventory.db', images_dir='images'):
-        self.db_path = db_path
-        self.images_dir = images_dir
-        os.makedirs(self.images_dir, exist_ok=True)
+    def __init__(self, db_path=None, images_dir=None):
+        # Obtener la ruta absoluta de la carpeta donde está este archivo
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.db_path = db_path or os.path.join(base_dir, 'inventory.db')
+        self.images_dir = images_dir or os.path.join(base_dir, 'images')
+        # Solo usar el directorio de imágenes si existe
+        if not os.path.isdir(self.images_dir):
+            raise FileNotFoundError(f"El directorio de imágenes '{self.images_dir}' no existe. Por favor, créalo manualmente.")
+        # Solo conectar a la base de datos si existe
+        if not os.path.isfile(self.db_path):
+            raise FileNotFoundError(f"La base de datos '{self.db_path}' no existe. Por favor, créala manualmente.")
         self.conn = sqlite3.connect(self.db_path)
         self.create_table()
 
     def create_table(self):
         with self.conn:
-            # Crea una nueva tabla solo si no existe
             self.conn.execute('''
                 CREATE TABLE IF NOT EXISTS products (
                     id INTEGER PRIMARY KEY,
@@ -25,6 +31,8 @@ class Inventory:
                     image_path TEXT
                 )
             ''')
+            self.conn.execute('CREATE INDEX IF NOT EXISTS idx_lote ON products (lote)')
+            self.conn.execute('CREATE INDEX IF NOT EXISTS idx_nombre ON products (nombre)')
 
     def add_product(self, image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp):
         # Guarda la imagen con el nombre del producto

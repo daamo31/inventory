@@ -1,10 +1,10 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
+from kivymd.uix.button import MDButton, MDButtonText
 import pandas as pd
 from datetime import datetime
 import os
@@ -26,12 +26,18 @@ class SalesScreen(Screen):
         layout.add_widget(self.scroll_view)
 
         # Botón para finalizar ventas
-        finalize_button = Button(text='Finalizar Ventas', size_hint=(1, 0.1))
+        finalize_button = MDButton(
+            MDButtonText(text='Finalizar Ventas'),
+            size_hint=(1, 0.1)
+        )
         finalize_button.bind(on_press=self.finalize_sales)
         layout.add_widget(finalize_button)
 
         # Botón de "Atrás"
-        back_button = Button(text='Atrás', size_hint=(1, 0.1))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.1)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 

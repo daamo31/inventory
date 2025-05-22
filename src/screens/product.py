@@ -1,5 +1,5 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
+from kivymd.uix.button import MDButton, MDButtonText
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
@@ -10,27 +10,40 @@ from camera import CameraWidget
 class AddProductPhotoScreen(Screen):
     def __init__(self, **kwargs):
         super(AddProductPhotoScreen, self).__init__(**kwargs)
-        self.captured_image_path = None  # Inicializar el atributo
+        self.captured_image_path = None
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Capturar Foto del Producto:')
         layout.add_widget(self.info_label)
 
-        self.camera_widget = CameraWidget(size_hint=(1, 0.7))  # Aumentar el tamaño de la cámara
+        # La cámara ocupa la mayor parte de la pantalla
+        self.camera_widget = CameraWidget(size_hint=(1, 0.7), height=400)
         layout.add_widget(self.camera_widget)
 
-        capture_button = Button(text='Capturar', size_hint=(1, 0.1))
+        # Botones en una fila pequeña abajo
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15), spacing=10)
+        capture_button = MDButton(
+            MDButtonText(text='Capturar'),
+            size_hint=(1, 1)
+        )
         capture_button.bind(on_press=self.capture_image)
-        layout.add_widget(capture_button)
+        button_layout.add_widget(capture_button)
 
-        next_button = Button(text='Siguiente', size_hint=(1, 0.1))
+        next_button = MDButton(
+            MDButtonText(text='Siguiente'),
+            size_hint=(1, 1)
+        )
         next_button.bind(on_press=self.go_to_next)
-        layout.add_widget(next_button)
+        button_layout.add_widget(next_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.1))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 1)
+        )
         back_button.bind(on_press=self.go_back)
-        layout.add_widget(back_button)
+        button_layout.add_widget(back_button)
 
+        layout.add_widget(button_layout)
         self.add_widget(layout)
 
     def on_enter(self):
@@ -41,10 +54,10 @@ class AddProductPhotoScreen(Screen):
         self.camera_widget.stop_camera()
 
     def capture_image(self, instance):
-        image_path = self.camera_widget.capture_product_image()  # Usar el nuevo método
+        image_path = self.camera_widget.capture_product_image()
         if image_path:
             self.manager.get_screen('add_product_name').update_image_preview(image_path)
-            self.captured_image_path = image_path  # Guardar la imagen capturada
+            self.captured_image_path = image_path
 
     def go_to_next(self, instance):
         self.manager.current = 'add_product_name'
@@ -67,11 +80,17 @@ class AddProductNameScreen(Screen):
         self.image_preview = Image(size_hint=(1, 0.5))
         layout.add_widget(self.image_preview)
 
-        next_button = Button(text='Siguiente', size_hint=(1, 0.2))
+        next_button = MDButton(
+            MDButtonText(text='Siguiente'),
+            size_hint=(1, 0.2)
+        )
         next_button.bind(on_press=self.go_to_next)
         layout.add_widget(next_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.2)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -105,11 +124,17 @@ class AddProductProveedorScreen(Screen):
         self.proveedor_input = TextInput(hint_text='Proveedor del producto', size_hint=(1, 0.1))
         layout.add_widget(self.proveedor_input)
 
-        next_button = Button(text='Siguiente', size_hint=(1, 0.2))
+        next_button = MDButton(
+            MDButtonText(text='Siguiente'),
+            size_hint=(1, 0.2)
+        )
         next_button.bind(on_press=self.go_to_next)
         layout.add_widget(next_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.2)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -125,7 +150,6 @@ class AddProductProveedorScreen(Screen):
         self.manager.current = 'add_product_name'
 
     def update_info_input(self, data):
-        """Actualiza los campos de entrada de información en la interfaz de usuario."""
         if data:
             if 'nombre' in data:
                 self.manager.get_screen('add_product_name').nombre_input.text = data['nombre']
@@ -144,25 +168,33 @@ class AddProductLoteScreen(Screen):
         self.info_label = Label(text='Capturar Lote y Fecha de Caducidad:')
         layout.add_widget(self.info_label)
 
-        self.camera_widget = CameraWidget(size_hint=(1, 3))  # Aumentar el tamaño de la cámara
+        self.camera_widget = CameraWidget(size_hint=(1, 3))
         layout.add_widget(self.camera_widget)
 
-        capture_button = Button(text='Capturar Lote', size_hint=(1, 0.1))
+        capture_button = MDButton(
+            MDButtonText(text='Capturar Lote'),
+            size_hint=(1, 0.1)
+        )
         capture_button.bind(on_press=self.capture_lote_image)
         layout.add_widget(capture_button)
 
-        # Campos de entrada manual para lote y fecha de caducidad
         self.fecha_input = TextInput(hint_text='Fecha de Caducidad (dd/mm/yyyy)', size_hint=(1, 0.1))
         layout.add_widget(self.fecha_input)
 
         self.lote_input = TextInput(hint_text='Lote', size_hint=(1, 0.1))
         layout.add_widget(self.lote_input)
 
-        next_button = Button(text='Siguiente', size_hint=(1, 0.1))
+        next_button = MDButton(
+            MDButtonText(text='Siguiente'),
+            size_hint=(1, 0.1)
+        )
         next_button.bind(on_press=self.go_to_next)
         layout.add_widget(next_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.1))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.1)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -185,7 +217,6 @@ class AddProductLoteScreen(Screen):
             self.update_info_input(data)
 
     def go_to_next(self, instance):
-        # Usar los valores manuales si están presentes
         fecha_caducidad = self.fecha_input.text.strip() or self.camera_widget.info_label.text.split(',')[0].strip()
         lote = self.lote_input.text.strip() or self.camera_widget.info_label.text.split(',')[1].strip()
         data = {'fecha_caducidad': fecha_caducidad, 'lote': lote}
@@ -196,7 +227,6 @@ class AddProductLoteScreen(Screen):
         self.manager.current = 'add_product_proveedor'
 
     def update_info_input(self, data):
-        """Actualiza los campos de entrada de información en la interfaz de usuario."""
         if data:
             self.fecha_input.text = data.get('fecha_caducidad', '')
             self.lote_input.text = data.get('lote', '')
@@ -217,11 +247,17 @@ class AddProductPriceScreen(Screen):
         self.pvp_input = TextInput(hint_text='PVP', size_hint=(1, 0.1))
         layout.add_widget(self.pvp_input)
 
-        save_button = Button(text='Guardar', size_hint=(1, 0.2))
+        save_button = MDButton(
+            MDButtonText(text='Guardar'),
+            size_hint=(1, 0.2)
+        )
         save_button.bind(on_press=self.save_product)
         layout.add_widget(save_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.2)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -234,7 +270,7 @@ class AddProductPriceScreen(Screen):
         lote = self.manager.get_screen('add_product_lote').lote_input.text.strip() or self.manager.get_screen('add_product_lote').camera_widget.info_label.text.split(',')[1].strip()
         coste = self.coste_input.text.strip().replace(',', '.')
         pvp = self.pvp_input.text.strip().replace(',', '.')
-        image_path = self.manager.get_screen('add_product_photo').captured_image_path  # Usar la primera foto capturada
+        image_path = self.manager.get_screen('add_product_photo').captured_image_path
 
         if image_path and nombre and proveedor and fecha_caducidad and lote and coste and pvp:
             self.manager.inventory.add_product(image_path, nombre, proveedor, fecha_caducidad, lote, float(coste), float(pvp))
@@ -247,7 +283,6 @@ class AddProductPriceScreen(Screen):
         self.manager.current = 'add_product_lote'
 
     def update_info_input(self, data):
-        """Actualiza los campos de entrada de información en la interfaz de usuario."""
         if data:
             if 'nombre' in data:
                 self.manager.get_screen('add_product_name').nombre_input.text = data['nombre']
@@ -293,11 +328,17 @@ class ModifyProductScreen(Screen):
         self.pvp_input = TextInput(hint_text='Nuevo PVP', size_hint=(1, 0.1))
         layout.add_widget(self.pvp_input)
 
-        save_button = Button(text='Guardar Cambios', size_hint=(1, 0.2))
+        save_button = MDButton(
+            MDButtonText(text='Guardar Cambios'),
+            size_hint=(1, 0.2)
+        )
         save_button.bind(on_press=self.modify_product)
         layout.add_widget(save_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.2)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -352,11 +393,17 @@ class DeleteProductScreen(Screen):
         self.product_spinner = Spinner(text='Seleccionar Producto', size_hint=(1, 0.1))
         layout.add_widget(self.product_spinner)
 
-        delete_button = Button(text='Eliminar', size_hint=(1, 0.2))
+        delete_button = MDButton(
+            MDButtonText(text='Eliminar'),
+            size_hint=(1, 0.2)
+        )
         delete_button.bind(on_press=self.delete_product)
         layout.add_widget(delete_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.2)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -398,15 +445,24 @@ class AddExistingProductLoteScreen(Screen):
         self.camera_widget = CameraWidget(size_hint=(1, 0.5))
         layout.add_widget(self.camera_widget)
 
-        capture_button = Button(text='Capturar Lote y Fecha', size_hint=(1, 0.2))
+        capture_button = MDButton(
+            MDButtonText(text='Capturar Lote y Fecha'),
+            size_hint=(1, 0.2)
+        )
         capture_button.bind(on_press=self.capture_lote_image)
         layout.add_widget(capture_button)
 
-        save_button = Button(text='Guardar', size_hint=(1, 0.2))
+        save_button = MDButton(
+            MDButtonText(text='Guardar'),
+            size_hint=(1, 0.2)
+        )
         save_button.bind(on_press=self.save_product)
         layout.add_widget(save_button)
 
-        back_button = Button(text='Atrás', size_hint=(1, 0.2))
+        back_button = MDButton(
+            MDButtonText(text='Atrás'),
+            size_hint=(1, 0.2)
+        )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
 
@@ -415,7 +471,7 @@ class AddExistingProductLoteScreen(Screen):
     def on_enter(self):
         products = self.inventory.list_products()
         self.product_spinner.values = [f"{product[0]} ({product[1]})" for product in products]
-        self.camera_widget.start_camera()  # Asegurarse de que la cámara se inicia al entrar en la pantalla
+        self.camera_widget.start_camera()
 
     def on_leave(self):
         self.camera_widget.stop_camera()

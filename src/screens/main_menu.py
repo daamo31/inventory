@@ -1,29 +1,47 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
+from kivymd.uix.button import MDButton, MDButtonText  # KivyMD 2.x
 
 class MainMenuScreen(Screen):
     def __init__(self, **kwargs):
         super(MainMenuScreen, self).__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
 
-        # Añadir imagen al menú principal
-        logo_image = Image(source='images/morrico.jpeg', size_hint=(1, 1))
+        # Título del menú principal
+        title_label = Label(text="Menú Principal", font_size='24sp', size_hint=(1, 0.1), halign='center')
+        layout.add_widget(title_label)
+
+        # Imagen
+        logo_image = Image(source='images/morrico.jpeg', size_hint=(1, 0.5))
         layout.add_widget(logo_image)
 
-        inventory_button = Button(text='Inventario', size_hint=(1, 0.2))
-        inventory_button.bind(on_press=self.go_to_inventory)
-        layout.add_widget(inventory_button)
+        # Botones
+        button_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(1, 0.4))
 
-        sales_button = Button(text='Ventas', size_hint=(1, 0.2))
-        sales_button.bind(on_press=self.go_to_sales)
-        layout.add_widget(sales_button)
+        inventory_button = MDButton(
+            MDButtonText(text="Inventario"),
+            pos_hint={"center_x": 0.5},
+            on_release=self.go_to_inventory,
+        )
+        button_layout.add_widget(inventory_button)
 
-        reports_button = Button(text='Informes', size_hint=(1, 0.2))
-        reports_button.bind(on_press=self.go_to_reports)
-        layout.add_widget(reports_button)
+        sales_button = MDButton(
+            MDButtonText(text="Ventas"),
+            pos_hint={"center_x": 0.5},
+            on_release=self.go_to_sales,
+        )
+        button_layout.add_widget(sales_button)
 
+        reports_button = MDButton(
+            MDButtonText(text="Informes"),
+            pos_hint={"center_x": 0.5},
+            on_release=self.go_to_reports,
+        )
+        button_layout.add_widget(reports_button)
+
+        layout.add_widget(button_layout)
         self.add_widget(layout)
 
     def go_to_inventory(self, instance):
