@@ -5,6 +5,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
+from kivy.uix.widget import Widget
 from camera import CameraWidget
 
 class AddProductPhotoScreen(Screen):
@@ -13,32 +14,55 @@ class AddProductPhotoScreen(Screen):
         self.captured_image_path = None
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
-        self.info_label = Label(text='Capturar Foto del Producto:')
+        self.info_label = Label(text='Capturar Foto del Producto:', size_hint=(1, 0.05), font_size='16sp')
         layout.add_widget(self.info_label)
 
-        # La cámara ocupa la mayor parte de la pantalla
-        self.camera_widget = CameraWidget(size_hint=(1, 0.7), height=400)
+        # La cámara ocupa casi toda la pantalla (más del 80%)
+        self.camera_widget = CameraWidget(size_hint=(1, 0.9))
         layout.add_widget(self.camera_widget)
 
-        # Botones en una fila pequeña abajo
-        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15), spacing=10)
+        # Botones en una fila pequeña abajo, alineados: Atrás (izq), Capturar (centro), Siguiente (der)
+        from kivy.uix.widget import Widget
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.08), spacing=10)
+
+        # Botón Salir alineado a la izquierda
+        salir_button = MDButton(
+            MDButtonText(text='Salir'),
+            size_hint=(None, 1),
+            width=90
+        )
+        salir_button.bind(on_press=self.go_exit)
+        button_layout.add_widget(salir_button)
+
+        # Espaciador flexible
+        button_layout.add_widget(Widget())
+
+        # Botón Capturar centrado
         capture_button = MDButton(
             MDButtonText(text='Capturar'),
-            size_hint=(1, 1)
+            size_hint=(None, 1),
+            width=140
         )
         capture_button.bind(on_press=self.capture_image)
         button_layout.add_widget(capture_button)
 
+        # Espaciador flexible
+        button_layout.add_widget(Widget())
+
+        # Botón Siguiente alineado a la derecha
         next_button = MDButton(
             MDButtonText(text='Siguiente'),
-            size_hint=(1, 1)
+            size_hint=(None, 1),
+            width=120
         )
         next_button.bind(on_press=self.go_to_next)
         button_layout.add_widget(next_button)
 
+        # Botón Atrás alineado a la derecha
         back_button = MDButton(
             MDButtonText(text='Atrás'),
-            size_hint=(1, 1)
+            size_hint=(None, 1),
+            width=120
         )
         back_button.bind(on_press=self.go_back)
         button_layout.add_widget(back_button)
@@ -65,6 +89,9 @@ class AddProductPhotoScreen(Screen):
     def go_back(self, instance):
         self.manager.current = 'inventory'
 
+    def go_exit(self, instance):
+        self.manager.current = 'main_menu'
+
 
 class AddProductNameScreen(Screen):
     def __init__(self, **kwargs):
@@ -80,19 +107,35 @@ class AddProductNameScreen(Screen):
         self.image_preview = Image(size_hint=(1, 0.5))
         layout.add_widget(self.image_preview)
 
+        from kivy.uix.widget import Widget
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15), spacing=10)
+        # Botón Salir alineado a la izquierda
+        salir_button = MDButton(
+            MDButtonText(text='Salir'),
+            size_hint=(None, 1),
+            width=90
+        )
+        salir_button.bind(on_press=self.go_exit)
+        button_layout.add_widget(salir_button)
+        button_layout.add_widget(Widget())
         next_button = MDButton(
             MDButtonText(text='Siguiente'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=120
         )
         next_button.bind(on_press=self.go_to_next)
-        layout.add_widget(next_button)
+        button_layout.add_widget(next_button)
 
+        # Botón Atrás alineado a la derecha
         back_button = MDButton(
             MDButtonText(text='Atrás'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=120
         )
         back_button.bind(on_press=self.go_back)
-        layout.add_widget(back_button)
+        button_layout.add_widget(back_button)
+
+        layout.add_widget(button_layout)
 
         self.add_widget(layout)
 
@@ -107,6 +150,9 @@ class AddProductNameScreen(Screen):
 
     def go_back(self, instance):
         self.manager.current = 'add_product_photo'
+
+    def go_exit(self, instance):
+        self.manager.current = 'main_menu'
 
     def clear_fields(self):
         self.nombre_input.text = ''
@@ -124,19 +170,35 @@ class AddProductProveedorScreen(Screen):
         self.proveedor_input = TextInput(hint_text='Proveedor del producto', size_hint=(1, 0.1))
         layout.add_widget(self.proveedor_input)
 
+        from kivy.uix.widget import Widget
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15), spacing=10)
+        # Botón Salir alineado a la izquierda
+        salir_button = MDButton(
+            MDButtonText(text='Salir'),
+            size_hint=(None, 1),
+            width=90
+        )
+        salir_button.bind(on_press=self.go_exit)
+        button_layout.add_widget(salir_button)
+        button_layout.add_widget(Widget())
         next_button = MDButton(
             MDButtonText(text='Siguiente'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=120
         )
         next_button.bind(on_press=self.go_to_next)
-        layout.add_widget(next_button)
+        button_layout.add_widget(next_button)
 
+        # Botón Atrás alineado a la derecha
         back_button = MDButton(
             MDButtonText(text='Atrás'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=120
         )
         back_button.bind(on_press=self.go_back)
-        layout.add_widget(back_button)
+        button_layout.add_widget(back_button)
+
+        layout.add_widget(button_layout)
 
         self.add_widget(layout)
 
@@ -148,6 +210,9 @@ class AddProductProveedorScreen(Screen):
 
     def go_back(self, instance):
         self.manager.current = 'add_product_name'
+
+    def go_exit(self, instance):
+        self.manager.current = 'main_menu'
 
     def update_info_input(self, data):
         if data:
@@ -165,38 +230,55 @@ class AddProductLoteScreen(Screen):
         super(AddProductLoteScreen, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
-        self.info_label = Label(text='Capturar Lote y Fecha de Caducidad:')
+        self.info_label = Label(text='Capturar Lote y Fecha de Caducidad:', size_hint=(1, 0.05), font_size='16sp')
         layout.add_widget(self.info_label)
 
-        self.camera_widget = CameraWidget(size_hint=(1, 3))
+        self.camera_widget = CameraWidget(size_hint=(1, 1))
         layout.add_widget(self.camera_widget)
 
-        capture_button = MDButton(
-            MDButtonText(text='Capturar Lote'),
-            size_hint=(1, 0.1)
-        )
-        capture_button.bind(on_press=self.capture_lote_image)
-        layout.add_widget(capture_button)
-
-        self.fecha_input = TextInput(hint_text='Fecha de Caducidad (dd/mm/yyyy)', size_hint=(1, 0.1))
+        self.fecha_input = TextInput(hint_text='Fecha de Caducidad (dd/mm/yyyy)', size_hint=(1, 0.2))
         layout.add_widget(self.fecha_input)
 
         self.lote_input = TextInput(hint_text='Lote', size_hint=(1, 0.1))
         layout.add_widget(self.lote_input)
 
+    
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.12), spacing=10)
+        # Botón Salir alineado a la izquierda
+        salir_button = MDButton(
+            MDButtonText(text='Salir'),
+            size_hint=(None, 1),
+            width=90
+        )
+        salir_button.bind(on_press=self.go_exit)
+        button_layout.add_widget(salir_button)
+        button_layout.add_widget(Widget())
+        capture_button = MDButton(
+            MDButtonText(text='Capturar Lote'),
+            size_hint=(None, 1),
+            width=90
+        )
+        capture_button.bind(on_press=self.capture_lote_image)
+        button_layout.add_widget(capture_button)
+        button_layout.add_widget(Widget())
         next_button = MDButton(
             MDButtonText(text='Siguiente'),
-            size_hint=(1, 0.1)
+            size_hint=(None, 1),
+            width=90
         )
         next_button.bind(on_press=self.go_to_next)
-        layout.add_widget(next_button)
+        button_layout.add_widget(next_button)
 
+        # Botón Atrás alineado a la derecha
         back_button = MDButton(
             MDButtonText(text='Atrás'),
-            size_hint=(1, 0.1)
+            size_hint=(None, 1),
+            width=90
         )
         back_button.bind(on_press=self.go_back)
-        layout.add_widget(back_button)
+        button_layout.add_widget(back_button)
+
+        layout.add_widget(button_layout)
 
         self.add_widget(layout)
 
@@ -226,6 +308,9 @@ class AddProductLoteScreen(Screen):
     def go_back(self, instance):
         self.manager.current = 'add_product_proveedor'
 
+    def go_exit(self, instance):
+        self.manager.current = 'main_menu'
+
     def update_info_input(self, data):
         if data:
             self.fecha_input.text = data.get('fecha_caducidad', '')
@@ -247,19 +332,34 @@ class AddProductPriceScreen(Screen):
         self.pvp_input = TextInput(hint_text='PVP', size_hint=(1, 0.1))
         layout.add_widget(self.pvp_input)
 
+        
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15), spacing=10)
+        # Botón Salir alineado a la izquierda
+        salir_button = MDButton(
+            MDButtonText(text='Salir'),
+            size_hint=(None, 1),
+            width=90
+        )
+        salir_button.bind(on_press=self.go_exit)
+        button_layout.add_widget(salir_button)
+        button_layout.add_widget(Widget())
         save_button = MDButton(
             MDButtonText(text='Guardar'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=120
         )
         save_button.bind(on_press=self.save_product)
-        layout.add_widget(save_button)
+        button_layout.add_widget(save_button)
 
+        # Botón Atrás alineado a la derecha
         back_button = MDButton(
             MDButtonText(text='Atrás'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=120
         )
         back_button.bind(on_press=self.go_back)
-        layout.add_widget(back_button)
+        button_layout.add_widget(back_button)
+        layout.add_widget(button_layout)
 
         self.add_widget(layout)
 
@@ -281,6 +381,9 @@ class AddProductPriceScreen(Screen):
 
     def go_back(self, instance):
         self.manager.current = 'add_product_lote'
+
+    def go_exit(self, instance):
+        self.manager.current = 'main_menu'
 
     def update_info_input(self, data):
         if data:
@@ -445,26 +548,42 @@ class AddExistingProductLoteScreen(Screen):
         self.camera_widget = CameraWidget(size_hint=(1, 0.5))
         layout.add_widget(self.camera_widget)
 
+        from kivy.uix.widget import Widget
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.12), spacing=10)
+        # Botón Salir alineado a la izquierda
+        salir_button = MDButton(
+            MDButtonText(text='Salir'),
+            size_hint=(None, 1),
+            width=90
+        )
+        salir_button.bind(on_press=self.go_exit)
+        button_layout.add_widget(salir_button)
+        button_layout.add_widget(Widget())
         capture_button = MDButton(
             MDButtonText(text='Capturar Lote y Fecha'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=110
         )
         capture_button.bind(on_press=self.capture_lote_image)
-        layout.add_widget(capture_button)
-
+        button_layout.add_widget(capture_button)
+        button_layout.add_widget(Widget())
         save_button = MDButton(
             MDButtonText(text='Guardar'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=90
         )
         save_button.bind(on_press=self.save_product)
-        layout.add_widget(save_button)
+        button_layout.add_widget(save_button)
 
+        # Botón Atrás alineado a la derecha
         back_button = MDButton(
             MDButtonText(text='Atrás'),
-            size_hint=(1, 0.2)
+            size_hint=(None, 1),
+            width=90
         )
         back_button.bind(on_press=self.go_back)
-        layout.add_widget(back_button)
+        button_layout.add_widget(back_button)
+        layout.add_widget(button_layout)
 
         self.add_widget(layout)
 
@@ -489,14 +608,18 @@ class AddExistingProductLoteScreen(Screen):
 
     def save_product(self, instance):
         selected_product = self.product_spinner.text
-        if selected_product and hasattr(self, 'captured_image_path'):
+        if selected_product:
             product_name = selected_product.split(' (')[0]
             product = self.inventory.find_product(product_name)[0]
-            nombre, proveedor, _, _, coste, pvp, _ = product
+            nombre, proveedor, _, _, coste, pvp, image_path = product
             fecha_caducidad = self.camera_widget.info_label.text.split(',')[0].strip()
             lote = self.camera_widget.info_label.text.split(',')[1].strip()
-            self.inventory.add_product(self.captured_image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
+            # Usar la imagen original del producto, NO la capturada
+            self.inventory.add_product(image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
             self.manager.current = 'inventory'
 
     def go_back(self, instance):
         self.manager.current = 'inventory'
+
+    def go_exit(self, instance):
+        self.manager.current = 'main_menu'
