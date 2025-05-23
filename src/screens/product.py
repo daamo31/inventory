@@ -7,6 +7,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 from camera import CameraWidget
+import os
 
 class AddProductPhotoScreen(Screen):
     def __init__(self, **kwargs):
@@ -614,9 +615,14 @@ class AddExistingProductLoteScreen(Screen):
             nombre, proveedor, _, _, coste, pvp, image_path = product
             fecha_caducidad = self.camera_widget.info_label.text.split(',')[0].strip()
             lote = self.camera_widget.info_label.text.split(',')[1].strip()
-            # Usar la imagen original del producto, NO la capturada
-            self.inventory.add_product(image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
-            self.manager.current = 'inventory'
+            try:
+                if not image_path or not os.path.isfile(image_path):
+                    self.product_info_label.text = f"Error: Imagen original no encontrada para este producto."
+                    return
+                self.inventory.add_product(image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
+                self.manager.current = 'inventory'
+            except Exception as e:
+                self.product_info_label.text = f"Error: {str(e)}"
 
     def go_back(self, instance):
         self.manager.current = 'inventory'
