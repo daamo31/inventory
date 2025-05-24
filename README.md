@@ -1,4 +1,4 @@
-# Chuches Inventario
+# Morrico inventario
 
 Este proyecto es una aplicación móvil y de escritorio desarrollada en Python para gestionar el inventario de una tienda de chuches. Permite capturar imágenes de las etiquetas de los productos y almacenar información relevante como la fecha de caducidad, lote, precio y proveedor. Incluye cámara, OCR, informes y exportación de base de datos.
 

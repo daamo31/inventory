@@ -1,5 +1,5 @@
 [app]
-title = Chuches Inventario
+title = Morrico inventario
 package.name = chuchesinventario
 package.domain = org.chuches.inventario
 source.dir = src

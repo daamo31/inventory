@@ -25,7 +25,7 @@ class AddProductPhotoScreen(Screen):
         super(AddProductPhotoScreen, self).__init__(**kwargs)
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
@@ -138,7 +138,7 @@ class AddProductNameScreen(Screen):
         super(AddProductNameScreen, self).__init__(**kwargs)
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
@@ -219,7 +219,7 @@ class AddProductProveedorScreen(Screen):
         super(AddProductProveedorScreen, self).__init__(**kwargs)
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
@@ -299,7 +299,7 @@ class AddProductLoteScreen(Screen):
         super(AddProductLoteScreen, self).__init__(**kwargs)
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
@@ -408,7 +408,7 @@ class AddProductPriceScreen(Screen):
         super(AddProductPriceScreen, self).__init__(**kwargs)
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
@@ -670,7 +670,7 @@ class AddExistingProductLoteScreen(Screen):
         self.inventory = inventory
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 

@@ -24,7 +24,7 @@ class MainApp(MDApp):
     """Clase principal de la aplicación."""
 
     def build(self):
-        self.title = "Inventario"
+        self.title = "Morrico inventario"
         self.inventory = Inventory()
 
         sm = ScreenManager()
