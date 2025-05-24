@@ -1,6 +1,8 @@
 import os
 import glob
 import shutil
+import logging
+import pandas as pd
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
@@ -8,11 +10,9 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.spinner import Spinner
 from kivy.uix.filechooser import FileChooserIconView
-from kivymd.uix.button import MDButton, MDButtonText
-import pandas as pd
-import logging
 from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
+from kivymd.uix.button import MDButton, MDButtonText
 
 # Configuración de logging
 log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
@@ -23,6 +23,10 @@ logging.basicConfig(
 )
 
 class ReportsScreen(Screen):
+    """
+    Clase que representa la pantalla de informes en la aplicación.
+    Permite visualizar y descargar informes de ventas, así como exportar la base de datos.
+    """
     def __init__(self, **kwargs):
         super(ReportsScreen, self).__init__(**kwargs)
         self.date_spinner = None  # Inicializa el atributo para evitar errores

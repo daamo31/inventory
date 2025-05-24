@@ -1,6 +1,8 @@
 import re
-import cv2  # Usaremos OpenCV para preprocesamiento
+import cv2
 import easyocr
+import logging
+import numpy as np
 from PIL import Image
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -9,10 +11,12 @@ from kivy.uix.label import Label
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from datetime import datetime
-import numpy as np
-import logging
 
 class CameraWidget(BoxLayout):
+    """
+    Widget de cámara para captura y procesamiento de imágenes con OCR.
+    """
+
     def __init__(self, **kwargs):
         super(CameraWidget, self).__init__(**kwargs)
         self.orientation = 'vertical'
@@ -49,6 +53,7 @@ class CameraWidget(BoxLayout):
         self.bg_rect.size = self.size
 
     def start_camera(self):
+        """Inicia la cámara y comienza a actualizar la imagen."""
         try:
             if self.capture_device is None:
                 self.capture_device = cv2.VideoCapture(0)
@@ -58,6 +63,7 @@ class CameraWidget(BoxLayout):
             logging.error(f'Error al iniciar la cámara: {e}')
 
     def stop_camera(self):
+        """Detiene la cámara si está en funcionamiento."""
         try:
             if self.capture_device:
                 self.capture_device.release()
@@ -67,6 +73,7 @@ class CameraWidget(BoxLayout):
             logging.error(f'Error al detener la cámara: {e}')
 
     def update(self, *args):
+        """Actualiza la imagen de la cámara en el widget."""
         try:
             if self.capture_device:
                 ret, frame = self.capture_device.read()
@@ -80,6 +87,7 @@ class CameraWidget(BoxLayout):
             logging.error(f'Error al actualizar la imagen de la cámara: {e}')
 
     def capture(self, *args):
+        """Captura una imagen y extrae datos usando OCR."""
         try:
             if self.capture_device:
                 ret, frame = self.capture_device.read()
@@ -108,6 +116,7 @@ class CameraWidget(BoxLayout):
             return None
 
     def capture_product_image(self, *args):
+        """Captura una imagen del producto."""
         try:
             if self.capture_device:
                 ret, frame = self.capture_device.read()
@@ -127,6 +136,7 @@ class CameraWidget(BoxLayout):
             return None
 
     def preprocess_and_ocr(self, image_path):
+        """Preprocesa la imagen y aplica OCR para extraer texto."""
         try:
             image_cv = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
@@ -148,6 +158,7 @@ class CameraWidget(BoxLayout):
             return '', None
 
     def apply_preprocessing(self, image_cv):
+        """Aplica técnicas de preprocesamiento a la imagen para mejorar el OCR."""
         try:
             # 1. Aumento de contraste (CLAHE)
             clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
@@ -169,6 +180,7 @@ class CameraWidget(BoxLayout):
             return image_cv
 
     def extract_data(self, text):
+        """Extrae datos relevantes del texto usando expresiones regulares."""
         data = {}
         try:
             # Patrón de fecha mejorado para detectar diferentes formatos, incluyendo letras
@@ -202,6 +214,7 @@ class CameraWidget(BoxLayout):
             return None
 
     def update_info_input(self, data):
+        """Actualiza el campo de entrada de información en el padre."""
         try:
             self.parent.update_info_input(data)
             logging.info('Campo de entrada de información actualizado')

@@ -1,7 +1,7 @@
-import logging
 import os
 import glob
 import shutil
+import logging
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
@@ -18,7 +18,10 @@ logging.basicConfig(
 )
 
 class DownloadReportsScreen(Screen):
+    """Pantalla para descargar informes generados."""
+
     def __init__(self, **kwargs):
+        """Inicializa la pantalla de descarga de informes."""
         super(DownloadReportsScreen, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
@@ -45,10 +48,12 @@ class DownloadReportsScreen(Screen):
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
     def _update_bg_rect(self, *args):
+        """Actualiza el fondo de la pantalla."""
         self.bg_rect.pos = self.pos
         self.bg_rect.size = self.size
 
     def on_enter(self):
+        """Acciones al entrar en la pantalla."""
         try:
             self.display_reports()
             logging.info('Entrando a pantalla de descarga de informes')
@@ -56,6 +61,7 @@ class DownloadReportsScreen(Screen):
             logging.error(f'Error al entrar a pantalla de descarga de informes: {e}')
 
     def display_reports(self):
+        """Muestra los informes disponibles para descargar."""
         try:
             self.grid_layout.clear_widgets()
             informes_dir = os.path.join(os.path.dirname(__file__), '..', 'informes')
@@ -77,6 +83,7 @@ class DownloadReportsScreen(Screen):
             logging.critical(f'Error crítico al mostrar informes para descarga: {e}')
 
     def download_file(self, file_path):
+        """Descarga el archivo seleccionado."""
         try:
             downloads_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
             shutil.copy(file_path, downloads_dir)
@@ -85,6 +92,7 @@ class DownloadReportsScreen(Screen):
             logging.error(f'Error al descargar archivo {file_path}: {e}')
 
     def go_back(self, instance):
+        """Vuelve a la pantalla de informes."""
         try:
             self.manager.current = 'reports'
             logging.info('Volviendo a Informes desde descarga de informes')

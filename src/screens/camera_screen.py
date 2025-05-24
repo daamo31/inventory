@@ -4,10 +4,15 @@ from kivymd.uix.button import MDButton, MDButtonText
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 from kivy.uix.boxlayout import BoxLayout
+
 from camera import CameraWidget
 
 
 class CameraScreen(MDScreen):
+    """
+    Pantalla principal que muestra la cámara y permite al usuario capturar y guardar información sobre productos.
+    """
+
     def __init__(self, **kwargs):
         super(CameraScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -21,62 +26,16 @@ class CameraScreen(MDScreen):
         self.bg_rect.pos = self.pos
         self.bg_rect.size = self.size
 
-        # Layout principal
-        layout = BoxLayout(orientation="vertical", padding=10, spacing=10)
-
-        # 📸 La cámara ocupa la mayor parte de la pantalla
-        self.camera_widget = CameraWidget(size_hint=(1, 2))
-        layout.add_widget(self.camera_widget)
-
-        # 📌 Etiqueta de información
-        self.info_label = MDLabel(
-            text="Información de la etiqueta:",
-            halign="center",
-            size_hint=(1, 0.1),
-        )
-        layout.add_widget(self.info_label)
-
-        # 📌 Campo de entrada
-        self.info_input = MDTextField(
-            hint_text="Fecha de caducidad, lote",
-            size_hint=(1, 0.1),
-        )
-        layout.add_widget(self.info_input)
-
-        # 📍 Botones alineados en la parte inferior
-        button_layout = BoxLayout(size_hint=(1, 0.1), spacing=10)
-
-        back_button = MDButton(
-            MDButtonText(text="Atrás"),
-            pos_hint={"center_x": 0.5},
-            on_release=self.go_back,
-        )
-        button_layout.add_widget(back_button)
-
-        capture_button = MDButton(
-            MDButtonText(text="Capturar"),
-            pos_hint={"center_x": 0.5},
-            on_release=self.capture_image,
-        )
-        button_layout.add_widget(capture_button)
-
-        save_button = MDButton(
-            MDButtonText(text="Guardar"),
-            pos_hint={"center_x": 0.5},
-            on_release=self.save_info,
-        )
-        button_layout.add_widget(save_button)
-
-        layout.add_widget(button_layout)
-        self.add_widget(layout)
-
     def on_enter(self):
+        """Inicia la cámara al entrar en la pantalla."""
         self.camera_widget.start_camera()
 
     def on_leave(self):
+        """Detiene la cámara al salir de la pantalla."""
         self.camera_widget.stop_camera()
 
     def capture_image(self, instance):
+        """Captura una imagen y procesa los datos de la etiqueta."""
         image_path = self.camera_widget.capture()
 
         if image_path:
@@ -85,6 +44,7 @@ class CameraScreen(MDScreen):
             self.info_label.text = "Error al capturar la imagen"
 
     def process_image(self, image_path):
+        """Procesa la imagen capturada y extrae los datos de la etiqueta."""
         text, data = self.camera_widget.preprocess_and_ocr(image_path)
 
         if data:
@@ -94,6 +54,7 @@ class CameraScreen(MDScreen):
             self.info_label.text = "No se pudieron extraer datos de la imagen"
 
     def save_info(self, instance):
+        """Guarda la información de la etiqueta en la pantalla de añadir producto."""
         # Manejo seguro si el usuario no pone coma
         partes = self.info_input.text.split(",")
         fecha = partes[0].strip() if len(partes) > 0 else ""
@@ -107,9 +68,11 @@ class CameraScreen(MDScreen):
         self.manager.current = "add_product_lote"
 
     def go_back(self, instance):
+        """Vuelve a la pantalla anterior."""
         self.manager.current = "add_product_lote"
 
     def update_info_input(self, data):
+        """Actualiza el campo de entrada de información con los datos extraídos."""
         if data:
             self.info_input.text = f"{data.get('fecha_caducidad', 'N/A')}, {data.get('lote', 'N/A')}"
         else:

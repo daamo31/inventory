@@ -1,16 +1,15 @@
-import logging
 import os
+import logging
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDButton, MDButtonText
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
-from kivy.uix.label import Label
 from kivy.graphics import Color, Rectangle
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDButton, MDButtonText
 
 # Configuración de logging
 log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
@@ -21,6 +20,7 @@ logging.basicConfig(
 )
 
 class InventoryScreen(Screen):
+    """Pantalla principal de gestión de inventario."""
     def __init__(self, **kwargs):
         super(InventoryScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -118,6 +118,7 @@ class InventoryScreen(Screen):
 
 
 class ViewInventoryScreen(Screen):
+    """Pantalla para visualizar y editar el inventario."""
     def __init__(self, inventory, **kwargs):
         super(ViewInventoryScreen, self).__init__(**kwargs)
         with self.canvas.before:

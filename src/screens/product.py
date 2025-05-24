@@ -1,5 +1,6 @@
+import os
+import logging
 from kivy.uix.boxlayout import BoxLayout
-from kivymd.uix.button import MDButton, MDButtonText
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
@@ -7,8 +8,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 from camera import CameraWidget
-import logging
-import os
+from kivymd.uix.button import MDButton, MDButtonText
 
 # Configuración de logging
 log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
@@ -18,7 +18,9 @@ logging.basicConfig(
     handlers=[logging.FileHandler(log_path, encoding='utf-8'), logging.StreamHandler()]
 )
 
+
 class AddProductPhotoScreen(Screen):
+    """Pantalla para capturar la foto del producto."""
     def __init__(self, **kwargs):
         super(AddProductPhotoScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -131,6 +133,7 @@ class AddProductPhotoScreen(Screen):
 
 
 class AddProductNameScreen(Screen):
+    """Pantalla para ingresar el nombre del producto."""
     def __init__(self, **kwargs):
         super(AddProductNameScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -211,6 +214,7 @@ class AddProductNameScreen(Screen):
 
 
 class AddProductProveedorScreen(Screen):
+    """Pantalla para ingresar el proveedor del producto."""
     def __init__(self, **kwargs):
         super(AddProductProveedorScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -290,6 +294,7 @@ class AddProductProveedorScreen(Screen):
 
 
 class AddProductLoteScreen(Screen):
+    """Pantalla para capturar el lote y la fecha de caducidad del producto."""
     def __init__(self, **kwargs):
         super(AddProductLoteScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -398,6 +403,7 @@ class AddProductLoteScreen(Screen):
 
 
 class AddProductPriceScreen(Screen):
+    """Pantalla para ingresar el precio de coste y PVP del producto."""
     def __init__(self, **kwargs):
         super(AddProductPriceScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -493,6 +499,7 @@ class AddProductPriceScreen(Screen):
         self.pvp_input.text = ''
 
 class ModifyProductScreen(Screen):
+    """Pantalla para modificar un producto existente."""
     def __init__(self, **kwargs):
         super(ModifyProductScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -594,6 +601,7 @@ class ModifyProductScreen(Screen):
         logging.info('Volviendo a la pantalla de inventario')
 
 class DeleteProductScreen(Screen):
+    """Pantalla para eliminar un producto."""
     def __init__(self, **kwargs):
         super(DeleteProductScreen, self).__init__(**kwargs)
         with self.canvas.before:
@@ -656,6 +664,7 @@ class DeleteProductScreen(Screen):
 
 
 class AddExistingProductLoteScreen(Screen):
+    """Pantalla para añadir un lote a un producto existente."""
     def __init__(self, inventory, **kwargs):
         super(AddExistingProductLoteScreen, self).__init__(**kwargs)
         self.inventory = inventory

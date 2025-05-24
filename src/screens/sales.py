@@ -1,3 +1,7 @@
+import os
+import logging
+from datetime import datetime
+import pandas as pd
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
@@ -5,10 +9,6 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
 from kivymd.uix.button import MDButton, MDButtonText
-import pandas as pd
-from datetime import datetime
-import os
-import logging
 
 # Configuración de logging
 log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
@@ -19,6 +19,8 @@ logging.basicConfig(
 )
 
 class SalesScreen(Screen):
+    """Clase que representa la pantalla de ventas."""
+
     def __init__(self, inventory, **kwargs):
         super(SalesScreen, self).__init__(**kwargs)
         self.inventory = inventory
@@ -65,6 +67,7 @@ class SalesScreen(Screen):
         self.bg_rect.size = self.size
 
     def on_enter(self):
+        """Acciones a realizar al entrar en la pantalla de ventas."""
         try:
             self.display_products()
             logging.info('Entrando a Ventas')
@@ -72,6 +75,7 @@ class SalesScreen(Screen):
             logging.error(f'Error al entrar a Ventas: {e}')
 
     def display_products(self):
+        """Mostrar los productos disponibles en el inventario."""
         self.grid_layout.clear_widgets()
         products = self.inventory.list_products()
         grouped_products = self.group_products_by_name(products)
@@ -84,6 +88,7 @@ class SalesScreen(Screen):
             self.grid_layout.add_widget(product_image)
 
     def group_products_by_name(self, products):
+        """Agrupar productos por nombre."""
         grouped = {}
         for product in products:
             name = product[0]  # Suponiendo que el nombre está en la posición 0
@@ -93,6 +98,7 @@ class SalesScreen(Screen):
         return grouped
 
     def sell_product(self, product):
+        """Vender un producto del inventario."""
         try:
             nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path = product
             self.inventory.remove_product(lote)
@@ -105,6 +111,7 @@ class SalesScreen(Screen):
             logging.error(f'Error al vender producto: {e}')
 
     def finalize_sales(self, instance):
+        """Finalizar las ventas y generar un reporte en Excel."""
         try:
             # Guardar las ventas y la facturación en un archivo Excel
             sales_data = [(nombre, proveedor, fecha_caducidad, lote, pvp) for nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path in self.sales]
@@ -133,6 +140,7 @@ class SalesScreen(Screen):
             logging.critical(f'Error crítico al finalizar ventas: {e}')
 
     def go_back(self, instance):
+        """Volver al menú principal."""
         try:
             self.manager.current = 'main_menu'
             logging.info('Volviendo al menú principal desde Ventas')
