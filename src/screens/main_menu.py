@@ -21,8 +21,14 @@ class MainMenuScreen(Screen):
 
         
         # Imagen
-        logo_image = Image(source='images/morrico.jpeg', size_hint=(1, 0.5))
+        logo_image = Image(source='images/morrico.jpeg', size_hint=(1, 0.6), allow_stretch=True, keep_ratio=False, pos_hint={'center_x': 0.5, 'center_y': 0.5})
         layout.add_widget(logo_image)
+
+        # Fondo animado GIF en el menú principal
+        gif_img = os.path.join(os.path.dirname(__file__), '..', 'images', 'chuches.png')
+        if os.path.exists(gif_img):
+            fondo = Image(source=gif_img, allow_stretch=True, keep_ratio=False, size_hint=(1, 1), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+            self.add_widget(fondo, index=0)
 
         # Botones
         button_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(1, 0.4))

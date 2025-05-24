@@ -29,10 +29,22 @@ class InventoryScreen(Screen):
         layout = MDBoxLayout(orientation='vertical', padding=20, spacing=20)
 
         
-        # Título como texto centrado
-        title_label = Label(text="Gestión de Inventario", font_size='26sp', size_hint=(1, 0.15), halign='center', valign='middle')
+        # Título como texto centrado con fondo negro
+        from kivy.uix.boxlayout import BoxLayout
+        title_box = BoxLayout(size_hint=(1, 0.15), padding=0)
+        from kivy.uix.label import Label
+        from kivy.graphics import Color, Rectangle
+        title_label = Label(text="Gestión de Inventario", font_size='26sp', halign='center', valign='middle', color=(1,1,1,1))
         title_label.bind(size=title_label.setter('text_size'))
-        layout.add_widget(title_label)
+        def update_title_bg(*args):
+            title_bg.pos = title_box.pos
+            title_bg.size = title_box.size
+        with title_box.canvas.before:
+            Color(0, 0, 0, 1)
+            title_bg = Rectangle(pos=title_box.pos, size=title_box.size)
+        title_box.bind(pos=update_title_bg, size=update_title_bg)
+        title_box.add_widget(title_label)
+        layout.add_widget(title_box)
 
         # Contenedor centrado para los botones principales
         center_box = MDBoxLayout(orientation='vertical', spacing=50, size_hint=(1, 0.7), padding=[0,60,0,60])
@@ -189,18 +201,54 @@ class ViewInventoryScreen(Screen):
             self.grid_layout.add_widget(header_button)
 
             if self.expanded_groups.get(name, False):
+                # Tabla de cabecera (Imagen, Nombre, Proveedor, Fecha, Lote, Coste, PVP)
+                from kivy.uix.label import Label
+                from kivy.graphics import Color, Rectangle
+                header_table = GridLayout(cols=7, size_hint_y=None, height=36, padding=[0,0,0,0], spacing=1)
+                headers = [
+                    ("Imagen", 80),
+                    ("Nombre", 90),
+                    ("Proveedor", 90),
+                    ("Fecha", 90),
+                    ("Lote", 90),
+                    ("Coste", 70),
+                    ("PVP", 70)
+                ]
+                for col, w in headers:
+                    header_lbl = Label(text=col, bold=True, size_hint_y=None, height=36, size_hint_x=None, width=w, color=(0,0,0,1))
+                    with header_lbl.canvas.before:
+                        Color(1, 0.713, 0.757, 1)  # #FFB6C1
+                        Rectangle(pos=header_lbl.pos, size=header_lbl.size)
+                    def update_bg(instance, *args):
+                        for instr in instance.canvas.before.children:
+                            if isinstance(instr, Rectangle):
+                                instr.pos = instance.pos
+                                instr.size = instance.size
+                    header_lbl.bind(pos=update_bg, size=update_bg)
+                    header_table.add_widget(header_lbl)
+                self.grid_layout.add_widget(header_table)
                 for product in items:
-                    product_layout = GridLayout(cols=8, size_hint_y=None, height=100)
-                    image = Image(source=product[6] if product[6] else "default_image.png", size_hint_y=None, height=100)
+                    product_layout = GridLayout(cols=8, size_hint_y=None, height=90, spacing=1)
+                    # Imagen
+                    image = Image(source=product[6] if product[6] else "default_image.png", size_hint_y=None, height=80, size_hint_x=None, width=80)
                     product_layout.add_widget(image)
-                    for detail in product[:6]:
-                        text_input = TextInput(text=str(detail), size_hint_y=None, height=40, multiline=False)
-                        product_layout.add_widget(text_input)
-                    # Guardar el lote original (posición 3 de product)
+                    # Campos editables en el orden correcto y más grandes
+                    nombre_input = TextInput(text=str(product[0]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
+                    proveedor_input = TextInput(text=str(product[1]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
+                    fecha_input = TextInput(text=str(product[2]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
+                    lote_input = TextInput(text=str(product[3]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
+                    coste_input = TextInput(text=str(product[4]), size_hint_y=None, height=50, size_hint_x=None, width=70, multiline=False, font_size=18)
+                    pvp_input = TextInput(text=str(product[5]), size_hint_y=None, height=50, size_hint_x=None, width=70, multiline=False, font_size=18)
+                    product_layout.add_widget(nombre_input)
+                    product_layout.add_widget(proveedor_input)
+                    product_layout.add_widget(fecha_input)
+                    product_layout.add_widget(lote_input)
+                    product_layout.add_widget(coste_input)
+                    product_layout.add_widget(pvp_input)
                     self.original_lotes.append(product[3])
                     delete_button = MDButton(
                         MDButtonText(text="Eliminar"),
-                        size_hint_y=None, height=40
+                        size_hint_y=None, height=50, size_hint_x=None, width=80
                     )
                     delete_button.bind(on_press=lambda instance, lote=product[3]: self.delete_product(lote))
                     product_layout.add_widget(delete_button)
@@ -259,3 +307,13 @@ class ViewInventoryScreen(Screen):
     def _update_bg_rect(self, *args):
         self.bg_rect.pos = self.pos
         self.bg_rect.size = self.size
+
+        # Fondo de inventario: imagen chuches.png con opacidad baja
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(1, 1, 1, 0.5)  # Opacidad 0.5 sobre la imagen
+            self.bg_img = Rectangle(source='images/chuches.png', pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_img, size=self._update_bg_img)
+    def _update_bg_img(self, *args):
+        self.bg_img.pos = self.pos
+        self.bg_img.size = self.size
