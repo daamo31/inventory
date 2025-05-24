@@ -548,6 +548,12 @@ class AddExistingProductLoteScreen(Screen):
         self.camera_widget = CameraWidget(size_hint=(1, 0.5))
         layout.add_widget(self.camera_widget)
 
+        self.fecha_input = TextInput(hint_text='Fecha de Caducidad (dd/mm/yyyy)', size_hint=(1, 0.2))
+        layout.add_widget(self.fecha_input)
+
+        self.lote_input = TextInput(hint_text='Lote', size_hint=(1, 0.1))
+        layout.add_widget(self.lote_input)
+
         button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.12), spacing=10)
         # Botón Salir alineado a la izquierda
         salir_button = MDButton(
