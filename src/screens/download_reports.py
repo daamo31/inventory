@@ -20,12 +20,6 @@ logging.basicConfig(
 class DownloadReportsScreen(Screen):
     def __init__(self, **kwargs):
         super(DownloadReportsScreen, self).__init__(**kwargs)
-        with self.canvas.before:
-            from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)
-            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
-
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         # Área de scroll para los informes
@@ -44,7 +38,11 @@ class DownloadReportsScreen(Screen):
         layout.add_widget(back_button)
 
         self.add_widget(layout)
-        logging.info('DownloadReportsScreen inicializado correctamente')
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
     def _update_bg_rect(self, *args):
         self.bg_rect.pos = self.pos

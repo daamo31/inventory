@@ -13,7 +13,7 @@ class CameraScreen(MDScreen):
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
 
-            Color(0.12, 0.12, 0.18, 1)
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 

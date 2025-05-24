@@ -22,9 +22,8 @@ class InventoryScreen(Screen):
     def __init__(self, **kwargs):
         super(InventoryScreen, self).__init__(**kwargs)
         with self.canvas.before:
-            from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)
-            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            from kivy.graphics import Rectangle
+            self.bg_rect = Rectangle(source='images/chuches.png', pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
         layout = MDBoxLayout(orientation='vertical', padding=20, spacing=20)
@@ -108,9 +107,8 @@ class ViewInventoryScreen(Screen):
     def __init__(self, inventory, **kwargs):
         super(ViewInventoryScreen, self).__init__(**kwargs)
         with self.canvas.before:
-            from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)
-            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            from kivy.graphics import Rectangle
+            self.bg_rect = Rectangle(source='images/chuches.png', pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
         self.inventory = inventory
@@ -136,21 +134,26 @@ class ViewInventoryScreen(Screen):
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)
 
-        # Botones de abajo
+        # Botones de abajo alineados: Atrás a la izquierda, Guardar Cambios a la derecha
+        bottom_buttons = MDBoxLayout(orientation='horizontal', size_hint=(1, 0.1), padding=[0,0,0,0], spacing=10)
         btn_back = MDButton(
             MDButtonText(text="Atrás"),
-            size_hint=(1, 0.1)
+            size_hint=(None, 1),
+            width=140,
+            pos_hint={"x": 0}
         )
         btn_back.bind(on_press=self.go_back)
-
+        bottom_buttons.add_widget(btn_back)
+        bottom_buttons.add_widget(Widget())
         btn_save = MDButton(
             MDButtonText(text="Guardar Cambios"),
-            size_hint=(1, 0.1)
+            size_hint=(None, 1),
+            width=180,
+            pos_hint={"right": 1}
         )
         btn_save.bind(on_press=self.save_changes)
-
-        layout.add_widget(btn_back)
-        layout.add_widget(btn_save)
+        bottom_buttons.add_widget(btn_save)
+        layout.add_widget(bottom_buttons)
 
         self.add_widget(layout)
         logging.info('ViewInventoryScreen inicializado correctamente')
@@ -175,8 +178,9 @@ class ViewInventoryScreen(Screen):
         self.grid_layout.clear_widgets()
         self.original_lotes = []  # Limpiar la lista cada vez que se muestran productos
         grouped_products = self.group_products_by_name(products)
-
-        for name, items in grouped_products.items():
+        # Ordenar alfabéticamente por nombre
+        for name in sorted(grouped_products.keys()):
+            items = grouped_products[name]
             header_button = MDButton(
                 MDButtonText(text=f"{name} ({len(items)})"),
                 size_hint_y=None, height=50
@@ -187,23 +191,19 @@ class ViewInventoryScreen(Screen):
             if self.expanded_groups.get(name, False):
                 for product in items:
                     product_layout = GridLayout(cols=8, size_hint_y=None, height=100)
-
                     image = Image(source=product[6] if product[6] else "default_image.png", size_hint_y=None, height=100)
                     product_layout.add_widget(image)
-
                     for detail in product[:6]:
                         text_input = TextInput(text=str(detail), size_hint_y=None, height=40, multiline=False)
                         product_layout.add_widget(text_input)
                     # Guardar el lote original (posición 3 de product)
                     self.original_lotes.append(product[3])
-
                     delete_button = MDButton(
                         MDButtonText(text="Eliminar"),
                         size_hint_y=None, height=40
                     )
                     delete_button.bind(on_press=lambda instance, lote=product[3]: self.delete_product(lote))
                     product_layout.add_widget(delete_button)
-
                     self.grid_layout.add_widget(product_layout)
 
     def toggle_group(self, name):

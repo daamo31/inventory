@@ -24,13 +24,6 @@ class SalesScreen(Screen):
         self.inventory = inventory
         self.sales = []
         self.total_sales = 0
-
-        with self.canvas.before:
-            from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)
-            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
-
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         # Área de scroll para las imágenes de los productos
@@ -61,7 +54,11 @@ class SalesScreen(Screen):
         layout.add_widget(self.total_label)
 
         self.add_widget(layout)
-        logging.info('SalesScreen inicializado correctamente')
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
     def _update_bg_rect(self, *args):
         self.bg_rect.pos = self.pos

@@ -25,42 +25,23 @@ logging.basicConfig(
 class ReportsScreen(Screen):
     def __init__(self, **kwargs):
         super(ReportsScreen, self).__init__(**kwargs)
+        self.date_spinner = None  # Inicializa el atributo para evitar errores
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
-
-        # Desplegable para seleccionar la fecha
         self.date_spinner = Spinner(text='Seleccionar Fecha', size_hint=(1, 0.1))
         self.date_spinner.bind(text=self.display_reports)
         layout.add_widget(self.date_spinner)
-
-        # Área de scroll para los informes
-        self.scroll_view = ScrollView(size_hint=(1, 0.7))
-        self.grid_layout = GridLayout(cols=1, size_hint_y=None)
-        self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
-        self.scroll_view.add_widget(self.grid_layout)
-        layout.add_widget(self.scroll_view)
-
-        # Botón para descargar el archivo Excel
-        download_button = MDButton(
-            MDButtonText(text='Descargar Informe'),
-            size_hint=(1, 0.1)
-        )
-        download_button.bind(on_press=self.go_to_download_screen)
-        layout.add_widget(download_button)
-
-        # Botón de "Atrás"
+        # Botón de "Atrás" al final del layout
         back_button = MDButton(
             MDButtonText(text='Atrás'),
             size_hint=(1, 0.1)
         )
         back_button.bind(on_press=self.go_back)
         layout.add_widget(back_button)
-
         self.add_widget(layout)
         logging.info('ReportsScreen inicializado correctamente')
-
         with self.canvas.before:
             from kivy.graphics import Color, Rectangle
-            Color(0.12, 0.12, 0.18, 1)
+            Color(1, 0.713, 0.757, 1)  # #FFB6C1
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
             self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
 
@@ -71,13 +52,13 @@ class ReportsScreen(Screen):
     def on_enter(self):
         try:
             self.load_dates()
-            if self.date_spinner.values:
+            if self.date_spinner and self.date_spinner.values:
                 self.display_reports(self.date_spinner, self.date_spinner.text)
             logging.info('Entrando a Informes')
         except Exception as e:
             logging.error(f'Error al entrar a Informes: {e}')
-        # Añadir botón para ver errores del sistema
-        if not hasattr(self, 'error_button'):
+        # Añadir botón para ver errores del sistema solo si el layout existe
+        if not hasattr(self, 'error_button') and len(self.children) > 0:
             from kivymd.uix.button import MDButton, MDButtonText
             self.error_button = MDButton(
                 MDButtonText(text='Ver Errores del Sistema'),
