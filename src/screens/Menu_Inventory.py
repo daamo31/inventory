@@ -21,6 +21,12 @@ logging.basicConfig(
 class InventoryScreen(Screen):
     def __init__(self, **kwargs):
         super(InventoryScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = MDBoxLayout(orientation='vertical', padding=20, spacing=20)
 
         
@@ -65,6 +71,10 @@ class InventoryScreen(Screen):
         self.add_widget(layout)
         logging.info('InventoryScreen inicializado correctamente')
 
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def view_inventory(self, instance):
         try:
             logging.info('Navegando a Ver Inventario')
@@ -97,6 +107,12 @@ class InventoryScreen(Screen):
 class ViewInventoryScreen(Screen):
     def __init__(self, inventory, **kwargs):
         super(ViewInventoryScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         self.inventory = inventory
         self.expanded_groups = {}
         self.original_lotes = []  # Lista para guardar los lotes originales
@@ -239,3 +255,7 @@ class ViewInventoryScreen(Screen):
             logging.info('Cambios guardados correctamente en inventario')
         except Exception as e:
             logging.critical(f'Error crítico al guardar cambios en inventario: {e}')
+
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size

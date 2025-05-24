@@ -11,6 +11,8 @@ from kivy.uix.filechooser import FileChooserIconView
 from kivymd.uix.button import MDButton, MDButtonText
 import pandas as pd
 import logging
+from kivy.uix.popup import Popup
+from kivy.uix.textinput import TextInput
 
 # Configuración de logging
 log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
@@ -56,6 +58,16 @@ class ReportsScreen(Screen):
         self.add_widget(layout)
         logging.info('ReportsScreen inicializado correctamente')
 
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def on_enter(self):
         try:
             self.load_dates()
@@ -64,6 +76,15 @@ class ReportsScreen(Screen):
             logging.info('Entrando a Informes')
         except Exception as e:
             logging.error(f'Error al entrar a Informes: {e}')
+        # Añadir botón para ver errores del sistema
+        if not hasattr(self, 'error_button'):
+            from kivymd.uix.button import MDButton, MDButtonText
+            self.error_button = MDButton(
+                MDButtonText(text='Ver Errores del Sistema'),
+                size_hint=(1, 0.1)
+            )
+            self.error_button.bind(on_press=self.show_errors)
+            self.children[0].add_widget(self.error_button, index=0)
 
     def load_dates(self):
         try:
@@ -143,3 +164,35 @@ class ReportsScreen(Screen):
             logging.info('Volviendo al menú principal desde Informes')
         except Exception as e:
             logging.error(f'Error al volver al menú principal desde Informes: {e}')
+
+    def show_errors(self, instance):
+        
+        log_path = os.path.join(os.path.dirname(__file__), '..', 'informes', 'errores.log')
+        # Si no existe, copiar los errores recientes de app.log
+        if not os.path.exists(log_path):
+            app_log = os.path.join(os.path.dirname(__file__), '..', 'app.log')
+            if os.path.exists(app_log):
+                with open(app_log, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                error_lines = [l for l in lines if '[ERROR]' in l or '[CRITICAL]' in l]
+                with open(log_path, 'w', encoding='utf-8') as f:
+                    f.writelines(error_lines)
+        # Mostrar el contenido
+        if os.path.exists(log_path):
+            with open(log_path, 'r', encoding='utf-8') as f:
+                error_text = f.read()
+        else:
+            error_text = 'No hay errores registrados.'
+        # Layout del popup con botón de descarga
+        box = BoxLayout(orientation='vertical')
+        textinput = TextInput(text=error_text, readonly=True, multiline=True, font_size='14sp', size_hint=(1, 0.85))
+        box.add_widget(textinput)
+        download_btn = MDButton(MDButtonText(text='Descargar Errores'), size_hint=(1, 0.15))
+        def download_errors(instance):
+            import shutil
+            downloads_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+            shutil.copy(log_path, downloads_dir)
+        download_btn.bind(on_press=download_errors)
+        box.add_widget(download_btn)
+        popup = Popup(title='Errores del Sistema', content=box, size_hint=(0.9, 0.7))
+        popup.open()

@@ -17,19 +17,38 @@ class CameraWidget(BoxLayout):
         super(CameraWidget, self).__init__(**kwargs)
         self.orientation = 'vertical'
 
+        # Fondo personalizado (puede ser color sólido o imagen)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         self.image = KivyImage(size_hint=(1, 5))
         self.add_widget(self.image)
 
-        self.capture_button = Button(text="Capturar Imagen")
+        # Botón con color personalizado
+        self.capture_button = Button(
+            text="Capturar Imagen",
+            background_color=(0.2, 0.5, 0.9, 1),  # Azul vibrante
+            color=(1, 1, 1, 1),  # Texto blanco
+            font_size='18sp',
+            size_hint=(1, None),
+            height=50
+        )
         self.capture_button.bind(on_press=self.capture)
         self.add_widget(self.capture_button)
 
-        self.info_label = Label(text="Esperando captura...")
+        self.info_label = Label(text="Esperando captura...", color=(1,1,1,1), font_size='16sp')
         self.add_widget(self.info_label)
 
         self.capture_device = None
         self.reader = easyocr.Reader(['es', 'en'])  # Inicializa el lector de easyocr
         logging.info('CameraWidget inicializado')
+
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
 
     def start_camera(self):
         try:

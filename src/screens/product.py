@@ -21,6 +21,12 @@ logging.basicConfig(
 class AddProductPhotoScreen(Screen):
     def __init__(self, **kwargs):
         super(AddProductPhotoScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         self.captured_image_path = None
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
@@ -81,6 +87,10 @@ class AddProductPhotoScreen(Screen):
         self.add_widget(layout)
         logging.info('AddProductPhotoScreen inicializado correctamente')
 
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def on_enter(self):
         self.camera_widget.start_camera()
         self.manager.get_screen('add_product_name').clear_fields()
@@ -123,6 +133,12 @@ class AddProductPhotoScreen(Screen):
 class AddProductNameScreen(Screen):
     def __init__(self, **kwargs):
         super(AddProductNameScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Nombre del Producto:')
@@ -167,6 +183,10 @@ class AddProductNameScreen(Screen):
         self.add_widget(layout)
         logging.info('AddProductNameScreen inicializado correctamente')
 
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def update_image_preview(self, image_path):
         self.image_preview.source = image_path
 
@@ -193,6 +213,12 @@ class AddProductNameScreen(Screen):
 class AddProductProveedorScreen(Screen):
     def __init__(self, **kwargs):
         super(AddProductProveedorScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Proveedor del Producto:')
@@ -233,6 +259,10 @@ class AddProductProveedorScreen(Screen):
         self.add_widget(layout)
         logging.info('AddProductProveedorScreen inicializado correctamente')
 
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def go_to_next(self, instance):
         self.manager.get_screen('add_product_lote').update_info_input({
             'proveedor': self.proveedor_input.text.strip()
@@ -262,6 +292,12 @@ class AddProductProveedorScreen(Screen):
 class AddProductLoteScreen(Screen):
     def __init__(self, **kwargs):
         super(AddProductLoteScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Capturar Lote y Fecha de Caducidad:', size_hint=(1, 0.05), font_size='16sp')
@@ -317,6 +353,10 @@ class AddProductLoteScreen(Screen):
         self.add_widget(layout)
         logging.info('AddProductLoteScreen inicializado correctamente')
 
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def on_enter(self):
         self.camera_widget.start_camera()
         self.manager.get_screen('add_product_price').clear_fields()
@@ -360,6 +400,12 @@ class AddProductLoteScreen(Screen):
 class AddProductPriceScreen(Screen):
     def __init__(self, **kwargs):
         super(AddProductPriceScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Precio de Coste y PVP:')
@@ -403,6 +449,10 @@ class AddProductPriceScreen(Screen):
         self.add_widget(layout)
         logging.info('AddProductPriceScreen inicializado correctamente')
 
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def save_product(self, instance):
         nombre = self.manager.get_screen('add_product_name').nombre_input.text.strip()
         proveedor = self.manager.get_screen('add_product_proveedor').proveedor_input.text.strip()
@@ -445,6 +495,12 @@ class AddProductPriceScreen(Screen):
 class ModifyProductScreen(Screen):
     def __init__(self, **kwargs):
         super(ModifyProductScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Modificar Producto:')
@@ -492,6 +548,10 @@ class ModifyProductScreen(Screen):
         self.add_widget(layout)
         logging.info('ModifyProductScreen inicializado correctamente')
 
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
     def on_enter(self):
         products = self.manager.inventory.list_products()
         self.product_spinner.values = [f"{product[3]}" for product in products]
@@ -536,6 +596,12 @@ class ModifyProductScreen(Screen):
 class DeleteProductScreen(Screen):
     def __init__(self, **kwargs):
         super(DeleteProductScreen, self).__init__(**kwargs)
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.info_label = Label(text='Eliminar Producto:')
@@ -560,6 +626,10 @@ class DeleteProductScreen(Screen):
 
         self.add_widget(layout)
         logging.info('DeleteProductScreen inicializado correctamente')
+
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
 
     def on_enter(self):
         products = self.manager.inventory.list_products()
@@ -589,6 +659,12 @@ class AddExistingProductLoteScreen(Screen):
     def __init__(self, inventory, **kwargs):
         super(AddExistingProductLoteScreen, self).__init__(**kwargs)
         self.inventory = inventory
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(0.12, 0.12, 0.18, 1)  # Fondo oscuro azulado
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self._update_bg_rect, size=self._update_bg_rect)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.product_spinner = Spinner(text='Seleccionar Producto', size_hint=(1, 0.1))
@@ -645,6 +721,10 @@ class AddExistingProductLoteScreen(Screen):
 
         self.add_widget(layout)
         logging.info('AddExistingProductLoteScreen inicializado correctamente')
+
+    def _update_bg_rect(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
 
     def on_enter(self):
         products = self.inventory.list_products()
