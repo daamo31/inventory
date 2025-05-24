@@ -8,6 +8,15 @@ from kivymd.uix.button import MDButton, MDButtonText
 import pandas as pd
 from datetime import datetime
 import os
+import logging
+
+# Configuración de logging
+log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.FileHandler(log_path, encoding='utf-8'), logging.StreamHandler()]
+)
 
 class SalesScreen(Screen):
     def __init__(self, inventory, **kwargs):
@@ -46,9 +55,14 @@ class SalesScreen(Screen):
         layout.add_widget(self.total_label)
 
         self.add_widget(layout)
+        logging.info('SalesScreen inicializado correctamente')
 
     def on_enter(self):
-        self.display_products()
+        try:
+            self.display_products()
+            logging.info('Entrando a Ventas')
+        except Exception as e:
+            logging.error(f'Error al entrar a Ventas: {e}')
 
     def display_products(self):
         self.grid_layout.clear_widgets()
@@ -72,36 +86,48 @@ class SalesScreen(Screen):
         return grouped
 
     def sell_product(self, product):
-        nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path = product
-        self.inventory.remove_product(lote)
-        self.sales.append(product)
-        self.total_sales += pvp
-        self.total_label.text = f'Total: {self.total_sales}'
-        self.display_products()
+        try:
+            nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path = product
+            self.inventory.remove_product(lote)
+            self.sales.append(product)
+            self.total_sales += pvp
+            self.total_label.text = f'Total: {self.total_sales}'
+            self.display_products()
+            logging.info(f'Producto vendido: {nombre} (lote: {lote})')
+        except Exception as e:
+            logging.error(f'Error al vender producto: {e}')
 
     def finalize_sales(self, instance):
-        # Guardar las ventas y la facturación en un archivo Excel
-        sales_data = [(nombre, proveedor, fecha_caducidad, lote, pvp) for nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path in self.sales]
-        df = pd.DataFrame(sales_data, columns=['Nombre', 'Proveedor', 'Fecha de Caducidad', 'Lote', 'PVP'])
-        fecha_hora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        df['Fecha y Hora'] = fecha_hora
+        try:
+            # Guardar las ventas y la facturación en un archivo Excel
+            sales_data = [(nombre, proveedor, fecha_caducidad, lote, pvp) for nombre, proveedor, fecha_caducidad, lote, coste, pvp, image_path in self.sales]
+            df = pd.DataFrame(sales_data, columns=['Nombre', 'Proveedor', 'Fecha de Caducidad', 'Lote', 'PVP'])
+            fecha_hora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            df['Fecha y Hora'] = fecha_hora
 
-        # Añadir una fila para el total de facturación
-        total_row = pd.DataFrame([['', '', '', 'Total', self.total_sales, fecha_hora]], columns=df.columns)
-        df = pd.concat([df, total_row], ignore_index=True)
+            # Añadir una fila para el total de facturación
+            total_row = pd.DataFrame([['', '', '', 'Total', self.total_sales, fecha_hora]], columns=df.columns)
+            df = pd.concat([df, total_row], ignore_index=True)
 
-        # Crear la carpeta 'informes' si no existe
-        informes_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'informes')
-        os.makedirs(informes_dir, exist_ok=True)
+            # Crear la carpeta 'informes' si no existe
+            informes_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'informes')
+            os.makedirs(informes_dir, exist_ok=True)
 
-        # Guardar el archivo Excel en la carpeta 'informes'
-        df.to_excel(os.path.join(informes_dir, f'sales_report_{fecha_hora}.xlsx'), index=False)
+            # Guardar el archivo Excel en la carpeta 'informes'
+            df.to_excel(os.path.join(informes_dir, f'sales_report_{fecha_hora}.xlsx'), index=False)
 
-        # Reiniciar las ventas
-        self.sales = []
-        self.total_sales = 0
-        self.total_label.text = 'Total: 0'
-        self.manager.current = 'main_menu'
+            # Reiniciar las ventas
+            self.sales = []
+            self.total_sales = 0
+            self.total_label.text = 'Total: 0'
+            self.manager.current = 'main_menu'
+            logging.info('Ventas finalizadas y reporte generado')
+        except Exception as e:
+            logging.critical(f'Error crítico al finalizar ventas: {e}')
 
     def go_back(self, instance):
-        self.manager.current = 'main_menu'
+        try:
+            self.manager.current = 'main_menu'
+            logging.info('Volviendo al menú principal desde Ventas')
+        except Exception as e:
+            logging.error(f'Error al volver al menú principal desde Ventas: {e}')

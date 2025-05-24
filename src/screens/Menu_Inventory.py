@@ -1,3 +1,5 @@
+import logging
+import os
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
@@ -7,6 +9,14 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton, MDButtonText
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
+
+# Configuración de logging
+log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.FileHandler(log_path, encoding='utf-8'), logging.StreamHandler()]
+)
 
 class InventoryScreen(Screen):
     def __init__(self, **kwargs):
@@ -53,18 +63,35 @@ class InventoryScreen(Screen):
         layout.add_widget(bottom_box)
 
         self.add_widget(layout)
+        logging.info('InventoryScreen inicializado correctamente')
 
     def view_inventory(self, instance):
-        self.manager.current = 'view_inventory'
+        try:
+            logging.info('Navegando a Ver Inventario')
+            self.manager.current = 'view_inventory'
+        except Exception as e:
+            logging.error(f'Error al navegar a Ver Inventario: {e}')
 
     def add_product(self, instance):
-        self.manager.current = 'add_product_photo'
+        try:
+            logging.info('Navegando a Añadir nuevo producto')
+            self.manager.current = 'add_product_photo'
+        except Exception as e:
+            logging.error(f'Error al navegar a Añadir nuevo producto: {e}')
 
     def add_existing_product_lote(self, instance):
-        self.manager.current = 'add_existing_product_lote'
+        try:
+            logging.info('Navegando a Añadir Lote a Producto Existente')
+            self.manager.current = 'add_existing_product_lote'
+        except Exception as e:
+            logging.error(f'Error al navegar a Añadir Lote a Producto Existente: {e}')
 
     def go_back(self, instance):
-        self.manager.current = 'main_menu'
+        try:
+            logging.info('Volviendo al menú principal desde Inventario')
+            self.manager.current = 'main_menu'
+        except Exception as e:
+            logging.error(f'Error al volver al menú principal: {e}')
 
 
 class ViewInventoryScreen(Screen):
@@ -110,9 +137,14 @@ class ViewInventoryScreen(Screen):
         layout.add_widget(btn_save)
 
         self.add_widget(layout)
+        logging.info('ViewInventoryScreen inicializado correctamente')
 
     def on_enter(self):
-        self.display_products(self.inventory.list_products())
+        try:
+            self.display_products(self.inventory.list_products())
+            logging.info('Entrando a Ver Inventario')
+        except Exception as e:
+            logging.error(f'Error al mostrar productos en Ver Inventario: {e}')
 
     def group_products_by_name(self, products):
         grouped = {}
@@ -168,31 +200,42 @@ class ViewInventoryScreen(Screen):
         self.display_products(filtered_products)
 
     def delete_product(self, lote):
-        self.inventory.remove_product(lote)
-        self.display_products(self.inventory.list_products())
+        try:
+            self.inventory.remove_product(lote)
+            self.display_products(self.inventory.list_products())
+            logging.info(f'Producto eliminado: {lote}')
+        except Exception as e:
+            logging.error(f'Error al eliminar producto {lote}: {e}')
 
     def go_back(self, instance):
-        # Al volver, recargar productos actualizados desde la base de datos
-        self.display_products(self.inventory.list_products())
-        self.manager.current = 'main_menu'
+        try:
+            self.display_products(self.inventory.list_products())
+            self.manager.current = 'main_menu'
+            logging.info('Volviendo al menú principal desde Ver Inventario')
+        except Exception as e:
+            logging.error(f'Error al volver al menú principal desde Ver Inventario: {e}')
 
     def save_changes(self, instance):
         idx = 0
-        for widget in reversed(self.grid_layout.children):
-            if isinstance(widget, GridLayout) and len(widget.children) == 8:
-                image_widget, nombre_input, proveedor_input, fecha_input, lote_input, coste_input, pvp_input, delete_button = widget.children[::-1]
-                try:
-                    self.inventory.update_product(
-                        image_widget.source,
-                        nombre_input.text.strip(),
-                        proveedor_input.text.strip(),
-                        fecha_input.text.strip(),
-                        self.original_lotes[idx],  # Usar el lote original guardado al crear los widgets
-                        lote_input.text.strip(),
-                        float(coste_input.text.strip()),
-                        float(pvp_input.text.strip())
-                    )
-                except ValueError as e:
-                    print(f"Error al guardar cambios: {e}")
-                idx += 1
-        print("Cambios guardados correctamente")
+        try:
+            for widget in reversed(self.grid_layout.children):
+                if isinstance(widget, GridLayout) and len(widget.children) == 8:
+                    image_widget, nombre_input, proveedor_input, fecha_input, lote_input, coste_input, pvp_input, delete_button = widget.children[::-1]
+                    try:
+                        self.inventory.update_product(
+                            image_widget.source,
+                            nombre_input.text.strip(),
+                            proveedor_input.text.strip(),
+                            fecha_input.text.strip(),
+                            self.original_lotes[idx],
+                            lote_input.text.strip(),
+                            float(coste_input.text.strip()),
+                            float(pvp_input.text.strip())
+                        )
+                        logging.info(f'Producto actualizado: {nombre_input.text.strip()} (lote original: {self.original_lotes[idx]})')
+                    except ValueError as e:
+                        logging.warning(f'Error de valor al guardar cambios: {e}')
+                    idx += 1
+            logging.info('Cambios guardados correctamente en inventario')
+        except Exception as e:
+            logging.critical(f'Error crítico al guardar cambios en inventario: {e}')

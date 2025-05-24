@@ -10,6 +10,15 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.filechooser import FileChooserIconView
 from kivymd.uix.button import MDButton, MDButtonText
 import pandas as pd
+import logging
+
+# Configuración de logging
+log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.FileHandler(log_path, encoding='utf-8'), logging.StreamHandler()]
+)
 
 class ReportsScreen(Screen):
     def __init__(self, **kwargs):
@@ -45,11 +54,16 @@ class ReportsScreen(Screen):
         layout.add_widget(back_button)
 
         self.add_widget(layout)
+        logging.info('ReportsScreen inicializado correctamente')
 
     def on_enter(self):
-        self.load_dates()
-        if self.date_spinner.values:
-            self.display_reports(self.date_spinner, self.date_spinner.text)
+        try:
+            self.load_dates()
+            if self.date_spinner.values:
+                self.display_reports(self.date_spinner, self.date_spinner.text)
+            logging.info('Entrando a Informes')
+        except Exception as e:
+            logging.error(f'Error al entrar a Informes: {e}')
 
     def load_dates(self):
         try:
@@ -94,8 +108,12 @@ class ReportsScreen(Screen):
                     item_label = Label(text=item_text, size_hint_y=None, height=40)
                     row_layout.add_widget(item_label)
                 self.grid_layout.add_widget(row_layout)
+            logging.info(f'Mostrando informe para fecha: {date}')
         except FileNotFoundError:
             self.grid_layout.add_widget(Label(text="No hay informes disponibles.", size_hint_y=None, height=40))
+            logging.warning('No hay informes disponibles para mostrar')
+        except Exception as e:
+            logging.critical(f'Error crítico al mostrar informes: {e}')
 
     def download_report(self, instance):
         informes_dir = os.path.join(os.path.dirname(__file__), '..', 'informes')
@@ -104,7 +122,11 @@ class ReportsScreen(Screen):
         self.add_widget(filechooser)
         
     def go_to_download_screen(self, instance):
-        self.manager.current = 'download_reports'
+        try:
+            self.manager.current = 'download_reports'
+            logging.info('Navegando a pantalla de descarga de informes')
+        except Exception as e:
+            logging.error(f'Error al navegar a pantalla de descarga de informes: {e}')
 
     def on_file_selected(self, filechooser, selection, *args):
         if selection:
@@ -116,4 +138,8 @@ class ReportsScreen(Screen):
         print('Infome descargado', selected_file)
 
     def go_back(self, instance):
-        self.manager.current = 'main_menu'
+        try:
+            self.manager.current = 'main_menu'
+            logging.info('Volviendo al menú principal desde Informes')
+        except Exception as e:
+            logging.error(f'Error al volver al menú principal desde Informes: {e}')

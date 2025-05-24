@@ -1,18 +1,25 @@
+import logging
+import os
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivymd.uix.button import MDButton, MDButtonText  # KivyMD 2.x
 
+# Configuración de logging
+log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.FileHandler(log_path, encoding='utf-8'), logging.StreamHandler()]
+)
+
 class MainMenuScreen(Screen):
     def __init__(self, **kwargs):
         super(MainMenuScreen, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
 
-        # Título del menú principal
-        title_label = Label(text="Menú Principal", font_size='24sp', size_hint=(1, 0.1), halign='center')
-        layout.add_widget(title_label)
-
+        
         # Imagen
         logo_image = Image(source='images/morrico.jpeg', size_hint=(1, 0.5))
         layout.add_widget(logo_image)
@@ -43,12 +50,25 @@ class MainMenuScreen(Screen):
 
         layout.add_widget(button_layout)
         self.add_widget(layout)
+        logging.info('MainMenuScreen inicializado correctamente')
 
     def go_to_inventory(self, instance):
-        self.manager.current = 'inventory'
+        try:
+            logging.info('Navegando a Inventario')
+            self.manager.current = 'inventory'
+        except Exception as e:
+            logging.error(f'Error al navegar a Inventario: {e}')
 
     def go_to_sales(self, instance):
-        self.manager.current = 'sales'
+        try:
+            logging.info('Navegando a Ventas')
+            self.manager.current = 'sales'
+        except Exception as e:
+            logging.error(f'Error al navegar a Ventas: {e}')
 
     def go_to_reports(self, instance):
-        self.manager.current = 'reports'
+        try:
+            logging.info('Navegando a Informes')
+            self.manager.current = 'reports'
+        except Exception as e:
+            logging.critical(f'Error crítico al navegar a Informes: {e}')

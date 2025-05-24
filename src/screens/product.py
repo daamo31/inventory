@@ -7,7 +7,16 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 from camera import CameraWidget
+import logging
 import os
+
+# Configuración de logging
+log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.FileHandler(log_path, encoding='utf-8'), logging.StreamHandler()]
+)
 
 class AddProductPhotoScreen(Screen):
     def __init__(self, **kwargs):
@@ -70,6 +79,7 @@ class AddProductPhotoScreen(Screen):
 
         layout.add_widget(button_layout)
         self.add_widget(layout)
+        logging.info('AddProductPhotoScreen inicializado correctamente')
 
     def on_enter(self):
         self.camera_widget.start_camera()
@@ -79,19 +89,35 @@ class AddProductPhotoScreen(Screen):
         self.camera_widget.stop_camera()
 
     def capture_image(self, instance):
-        image_path = self.camera_widget.capture_product_image()
-        if image_path:
-            self.manager.get_screen('add_product_name').update_image_preview(image_path)
-            self.captured_image_path = image_path
+        try:
+            image_path = self.camera_widget.capture_product_image()
+            if image_path:
+                self.manager.get_screen('add_product_name').update_image_preview(image_path)
+                self.captured_image_path = image_path
+                logging.info('Imagen de producto capturada correctamente')
+        except Exception as e:
+            logging.error(f'Error al capturar imagen de producto: {e}')
 
     def go_to_next(self, instance):
-        self.manager.current = 'add_product_name'
+        try:
+            self.manager.current = 'add_product_name'
+            logging.info('Navegando a pantalla de nombre de producto')
+        except Exception as e:
+            logging.error(f'Error al navegar a pantalla de nombre de producto: {e}')
 
     def go_back(self, instance):
-        self.manager.current = 'inventory'
+        try:
+            self.manager.current = 'inventory'
+            logging.info('Volviendo a inventario desde foto producto')
+        except Exception as e:
+            logging.error(f'Error al volver a inventario desde foto producto: {e}')
 
     def go_exit(self, instance):
-        self.manager.current = 'main_menu'
+        try:
+            self.manager.current = 'main_menu'
+            logging.info('Saliendo al menú principal desde foto producto')
+        except Exception as e:
+            logging.error(f'Error al salir al menú principal desde foto producto: {e}')
 
 
 class AddProductNameScreen(Screen):
@@ -139,6 +165,7 @@ class AddProductNameScreen(Screen):
         layout.add_widget(button_layout)
 
         self.add_widget(layout)
+        logging.info('AddProductNameScreen inicializado correctamente')
 
     def update_image_preview(self, image_path):
         self.image_preview.source = image_path
@@ -148,12 +175,15 @@ class AddProductNameScreen(Screen):
             'nombre': self.nombre_input.text.strip()
         })
         self.manager.current = 'add_product_proveedor'
+        logging.info('Navegando a pantalla de proveedor de producto')
 
     def go_back(self, instance):
         self.manager.current = 'add_product_photo'
+        logging.info('Volviendo a la pantalla de foto de producto')
 
     def go_exit(self, instance):
         self.manager.current = 'main_menu'
+        logging.info('Saliendo al menú principal desde nombre producto')
 
     def clear_fields(self):
         self.nombre_input.text = ''
@@ -201,18 +231,22 @@ class AddProductProveedorScreen(Screen):
         layout.add_widget(button_layout)
 
         self.add_widget(layout)
+        logging.info('AddProductProveedorScreen inicializado correctamente')
 
     def go_to_next(self, instance):
         self.manager.get_screen('add_product_lote').update_info_input({
             'proveedor': self.proveedor_input.text.strip()
         })
         self.manager.current = 'add_product_lote'
+        logging.info('Navegando a pantalla de lote de producto')
 
     def go_back(self, instance):
         self.manager.current = 'add_product_name'
+        logging.info('Volviendo a la pantalla de nombre de producto')
 
     def go_exit(self, instance):
         self.manager.current = 'main_menu'
+        logging.info('Saliendo al menú principal desde proveedor producto')
 
     def update_info_input(self, data):
         if data:
@@ -281,6 +315,7 @@ class AddProductLoteScreen(Screen):
         layout.add_widget(button_layout)
 
         self.add_widget(layout)
+        logging.info('AddProductLoteScreen inicializado correctamente')
 
     def on_enter(self):
         self.camera_widget.start_camera()
@@ -297,6 +332,7 @@ class AddProductLoteScreen(Screen):
                 'lote': self.camera_widget.info_label.text.split(',')[1].strip() if len(self.camera_widget.info_label.text.split(',')) > 1 else ''
             }
             self.update_info_input(data)
+            logging.info('Imagen de lote capturada correctamente')
 
     def go_to_next(self, instance):
         fecha_caducidad = self.fecha_input.text.strip() or self.camera_widget.info_label.text.split(',')[0].strip()
@@ -304,12 +340,15 @@ class AddProductLoteScreen(Screen):
         data = {'fecha_caducidad': fecha_caducidad, 'lote': lote}
         self.manager.get_screen('add_product_price').update_info_input(data)
         self.manager.current = 'add_product_price'
+        logging.info('Navegando a pantalla de precio de producto')
 
     def go_back(self, instance):
         self.manager.current = 'add_product_proveedor'
+        logging.info('Volviendo a la pantalla de proveedor de producto')
 
     def go_exit(self, instance):
         self.manager.current = 'main_menu'
+        logging.info('Saliendo al menú principal desde lote producto')
 
     def update_info_input(self, data):
         if data:
@@ -362,6 +401,7 @@ class AddProductPriceScreen(Screen):
         layout.add_widget(button_layout)
 
         self.add_widget(layout)
+        logging.info('AddProductPriceScreen inicializado correctamente')
 
     def save_product(self, instance):
         nombre = self.manager.get_screen('add_product_name').nombre_input.text.strip()
@@ -376,14 +416,18 @@ class AddProductPriceScreen(Screen):
             self.manager.inventory.add_product(image_path, nombre, proveedor, fecha_caducidad, lote, float(coste), float(pvp))
             self.info_label.text = 'Producto añadido'
             self.manager.current = 'inventory'
+            logging.info('Producto guardado correctamente')
         else:
             self.info_label.text = 'Todos los campos son obligatorios.'
+            logging.warning('Intento de guardar producto fallido, campos incompletos')
 
     def go_back(self, instance):
         self.manager.current = 'add_product_lote'
+        logging.info('Volviendo a la pantalla de lote de producto')
 
     def go_exit(self, instance):
         self.manager.current = 'main_menu'
+        logging.info('Saliendo al menú principal desde precio producto')
 
     def update_info_input(self, data):
         if data:
@@ -446,6 +490,7 @@ class ModifyProductScreen(Screen):
         layout.add_widget(back_button)
 
         self.add_widget(layout)
+        logging.info('ModifyProductScreen inicializado correctamente')
 
     def on_enter(self):
         products = self.manager.inventory.list_products()
@@ -476,14 +521,17 @@ class ModifyProductScreen(Screen):
             try:
                 self.manager.inventory.update_product(foto, nombre, proveedor, fecha_caducidad, lote, nuevo_lote, float(coste), float(pvp))
                 self.info_label.text = 'Producto modificado'
+                logging.info('Producto modificado correctamente')
             except Exception as e:
                 self.info_label.text = f'Error al modificar el producto: {str(e)}'
+                logging.error(f'Error al modificar el producto: {str(e)}')
         else:
             self.info_label.text = 'Todos los campos son obligatorios.'
+            logging.warning('Intento de modificar producto fallido, campos incompletos')
 
     def go_back(self, instance):
         self.manager.current = 'inventory'
-
+        logging.info('Volviendo a la pantalla de inventario')
 
 class DeleteProductScreen(Screen):
     def __init__(self, **kwargs):
@@ -511,6 +559,7 @@ class DeleteProductScreen(Screen):
         layout.add_widget(back_button)
 
         self.add_widget(layout)
+        logging.info('DeleteProductScreen inicializado correctamente')
 
     def on_enter(self):
         products = self.manager.inventory.list_products()
@@ -523,13 +572,17 @@ class DeleteProductScreen(Screen):
             if product:
                 self.manager.inventory.remove_product(lote)
                 self.info_label.text = 'Producto eliminado'
+                logging.info('Producto eliminado correctamente')
             else:
                 self.info_label.text = 'Producto no encontrado'
+                logging.warning('Intento de eliminar producto fallido, producto no encontrado')
         else:
             self.info_label.text = 'El campo es obligatorio.'
+            logging.warning('Intento de eliminar producto fallido, campo vacío')
 
     def go_back(self, instance):
         self.manager.current = 'inventory'
+        logging.info('Volviendo a la pantalla de inventario')
 
 
 class AddExistingProductLoteScreen(Screen):
@@ -591,6 +644,7 @@ class AddExistingProductLoteScreen(Screen):
         layout.add_widget(button_layout)
 
         self.add_widget(layout)
+        logging.info('AddExistingProductLoteScreen inicializado correctamente')
 
     def on_enter(self):
         products = self.inventory.list_products()
@@ -615,6 +669,7 @@ class AddExistingProductLoteScreen(Screen):
         image_path = self.camera_widget.capture()
         if image_path:
             self.captured_image_path = image_path
+            logging.info('Imagen de lote y fecha capturada correctamente')
 
     def save_product(self, instance):
         selected_product = self.product_spinner.text
@@ -622,19 +677,25 @@ class AddExistingProductLoteScreen(Screen):
             product_name = selected_product.split(' (')[0]
             product = self.inventory.find_product(product_name)[0]
             nombre, proveedor, _, _, coste, pvp, image_path = product
-            fecha_caducidad = self.camera_widget.info_label.text.split(',')[0].strip()
-            lote = self.camera_widget.info_label.text.split(',')[1].strip()
+            # Usar primero los campos manuales si están rellenados
+            fecha_caducidad = self.fecha_input.text.strip() or self.camera_widget.info_label.text.split(',')[0].strip()
+            lote = self.lote_input.text.strip() or self.camera_widget.info_label.text.split(',')[1].strip()
             try:
                 if not image_path or not os.path.isfile(image_path):
                     self.product_info_label.text = f"Error: Imagen original no encontrada para este producto."
+                    logging.warning('Imagen original no encontrada para el producto seleccionado')
                     return
                 self.inventory.add_product(image_path, nombre, proveedor, fecha_caducidad, lote, coste, pvp)
                 self.manager.current = 'inventory'
+                logging.info('Producto existente agregado correctamente con nueva información de lote y fecha')
             except Exception as e:
                 self.product_info_label.text = f"Error: {str(e)}"
+                logging.error(f"Error al agregar producto existente con nueva información de lote y fecha: {str(e)}")
 
     def go_back(self, instance):
         self.manager.current = 'inventory'
+        logging.info('Volviendo a la pantalla de inventario')
 
     def go_exit(self, instance):
         self.manager.current = 'main_menu'
+        logging.info('Saliendo al menú principal desde agregar lote de producto existente')
