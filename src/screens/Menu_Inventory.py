@@ -9,6 +9,8 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton, MDButtonText
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
+from kivy.uix.label import Label
+from kivy.graphics import Color, Rectangle
 
 # Configuración de logging
 log_path = os.path.join(os.path.dirname(__file__), '..', 'app.log')
@@ -195,27 +197,26 @@ class ViewInventoryScreen(Screen):
             items = grouped_products[name]
             header_button = MDButton(
                 MDButtonText(text=f"{name} ({len(items)})"),
-                size_hint_y=None, height=50
+                size_hint_y=None, height=70
             )
             header_button.bind(on_press=lambda instance, n=name: self.toggle_group(n))
             self.grid_layout.add_widget(header_button)
 
             if self.expanded_groups.get(name, False):
                 # Tabla de cabecera (Imagen, Nombre, Proveedor, Fecha, Lote, Coste, PVP)
-                from kivy.uix.label import Label
-                from kivy.graphics import Color, Rectangle
-                header_table = GridLayout(cols=7, size_hint_y=None, height=36, padding=[0,0,0,0], spacing=1)
+                
+                header_table = GridLayout(cols=7, size_hint_y=None, height=55, padding=[0,0,0,0], spacing=2)
                 headers = [
-                    ("Imagen", 80),
-                    ("Nombre", 90),
-                    ("Proveedor", 90),
-                    ("Fecha", 90),
-                    ("Lote", 90),
-                    ("Coste", 70),
-                    ("PVP", 70)
+                    ("Imagen", 180),
+                    ("Nombre", 200),
+                    ("Proveedor", 200),
+                    ("Fecha", 200),
+                    ("Lote", 200),
+                    ("Coste", 160),
+                    ("PVP", 160)
                 ]
                 for col, w in headers:
-                    header_lbl = Label(text=col, bold=True, size_hint_y=None, height=36, size_hint_x=None, width=w, color=(0,0,0,1))
+                    header_lbl = Label(text=col, bold=True, size_hint_y=None, height=55, size_hint_x=None, width=w, color=(0,0,0,1), font_size=22)
                     with header_lbl.canvas.before:
                         Color(1, 0.713, 0.757, 1)  # #FFB6C1
                         Rectangle(pos=header_lbl.pos, size=header_lbl.size)
@@ -228,17 +229,17 @@ class ViewInventoryScreen(Screen):
                     header_table.add_widget(header_lbl)
                 self.grid_layout.add_widget(header_table)
                 for product in items:
-                    product_layout = GridLayout(cols=8, size_hint_y=None, height=90, spacing=1)
+                    product_layout = GridLayout(cols=8, size_hint_y=None, height=120, spacing=2)
                     # Imagen
-                    image = Image(source=product[6] if product[6] else "default_image.png", size_hint_y=None, height=80, size_hint_x=None, width=80)
+                    image = Image(source=product[6] if product[6] else "default_image.png", size_hint_y=None, height=110, size_hint_x=None, width=180)
                     product_layout.add_widget(image)
-                    # Campos editables en el orden correcto y más grandes
-                    nombre_input = TextInput(text=str(product[0]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
-                    proveedor_input = TextInput(text=str(product[1]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
-                    fecha_input = TextInput(text=str(product[2]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
-                    lote_input = TextInput(text=str(product[3]), size_hint_y=None, height=50, size_hint_x=None, width=90, multiline=False, font_size=18)
-                    coste_input = TextInput(text=str(product[4]), size_hint_y=None, height=50, size_hint_x=None, width=70, multiline=False, font_size=18)
-                    pvp_input = TextInput(text=str(product[5]), size_hint_y=None, height=50, size_hint_x=None, width=70, multiline=False, font_size=18)
+                    # Campos editables en el orden correcto y con el mismo ancho que la cabecera
+                    nombre_input = TextInput(text=str(product[0]), size_hint_y=None, height=70, size_hint_x=None, width=200, multiline=False, font_size=26)
+                    proveedor_input = TextInput(text=str(product[1]), size_hint_y=None, height=70, size_hint_x=None, width=200, multiline=False, font_size=26)
+                    fecha_input = TextInput(text=str(product[2]), size_hint_y=None, height=70, size_hint_x=None, width=200, multiline=False, font_size=26)
+                    lote_input = TextInput(text=str(product[3]), size_hint_y=None, height=70, size_hint_x=None, width=200, multiline=False, font_size=26)
+                    coste_input = TextInput(text=str(product[4]), size_hint_y=None, height=70, size_hint_x=None, width=160, multiline=False, font_size=26)
+                    pvp_input = TextInput(text=str(product[5]), size_hint_y=None, height=70, size_hint_x=None, width=160, multiline=False, font_size=26)
                     product_layout.add_widget(nombre_input)
                     product_layout.add_widget(proveedor_input)
                     product_layout.add_widget(fecha_input)
@@ -248,7 +249,7 @@ class ViewInventoryScreen(Screen):
                     self.original_lotes.append(product[3])
                     delete_button = MDButton(
                         MDButtonText(text="Eliminar"),
-                        size_hint_y=None, height=50, size_hint_x=None, width=80
+                        size_hint_y=None, height=70, size_hint_x=None, width=180
                     )
                     delete_button.bind(on_press=lambda instance, lote=product[3]: self.delete_product(lote))
                     product_layout.add_widget(delete_button)

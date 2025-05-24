@@ -30,6 +30,13 @@ class ReportsScreen(Screen):
         self.date_spinner = Spinner(text='Seleccionar Fecha', size_hint=(1, 0.1))
         self.date_spinner.bind(text=self.display_reports)
         layout.add_widget(self.date_spinner)
+        # Botón para exportar la base de datos
+        export_db_button = MDButton(
+            MDButtonText(text='Exportar Base de Datos'),
+            size_hint=(1, 0.1)
+        )
+        export_db_button.bind(on_press=self.export_db)
+        layout.add_widget(export_db_button)
         # Botón de "Atrás" al final del layout
         back_button = MDButton(
             MDButtonText(text='Atrás'),
@@ -177,3 +184,28 @@ class ReportsScreen(Screen):
         box.add_widget(download_btn)
         popup = Popup(title='Errores del Sistema', content=box, size_hint=(0.9, 0.7))
         popup.open()
+
+    def export_db(self, instance):
+        try:
+            db_path = os.path.join(os.path.dirname(__file__), '..', 'inventory.db')
+            downloads_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+            if os.path.exists(db_path):
+                import shutil
+                shutil.copy(db_path, downloads_dir)
+                from kivy.uix.popup import Popup
+                from kivy.uix.label import Label
+                popup = Popup(title='Exportación exitosa', content=Label(text='Base de datos exportada a Descargas.'), size_hint=(0.7, 0.3))
+                popup.open()
+                logging.info('Base de datos exportada correctamente a Descargas')
+            else:
+                from kivy.uix.popup import Popup
+                from kivy.uix.label import Label
+                popup = Popup(title='Error', content=Label(text='No se encontró la base de datos.'), size_hint=(0.7, 0.3))
+                popup.open()
+                logging.error('No se encontró la base de datos para exportar')
+        except Exception as e:
+            from kivy.uix.popup import Popup
+            from kivy.uix.label import Label
+            popup = Popup(title='Error', content=Label(text=f'Error al exportar: {e}'), size_hint=(0.7, 0.3))
+            popup.open()
+            logging.error(f'Error al exportar la base de datos: {e}')
