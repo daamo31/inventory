@@ -5,32 +5,52 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton, MDButtonText
+from kivy.uix.label import Label
+from kivy.uix.widget import Widget
 
 class InventoryScreen(Screen):
     def __init__(self, **kwargs):
         super(InventoryScreen, self).__init__(**kwargs)
         layout = MDBoxLayout(orientation='vertical', padding=20, spacing=20)
 
-        title = MDButton(
-            MDButtonText(text="Gestión de Inventario", bold=True),
-            size_hint=(1, 0.1)
-        )
-        layout.add_widget(title)
+        
+        # Título como texto centrado
+        title_label = Label(text="Gestión de Inventario", font_size='26sp', size_hint=(1, 0.15), halign='center', valign='middle')
+        title_label.bind(size=title_label.setter('text_size'))
+        layout.add_widget(title_label)
 
+        # Contenedor centrado para los botones principales
+        center_box = MDBoxLayout(orientation='vertical', spacing=50, size_hint=(1, 0.7), padding=[0,60,0,60])
+        center_box.add_widget(Widget(size_hint_y=0.2))  # Espaciador superior
         buttons_info = [
             ("Ver Inventario", self.view_inventory),
             ("Añadir nuevo producto", self.add_product),
-            ("Añadir Lote a Producto Existente", self.add_existing_product_lote),
-            ("Atrás", self.go_back)
+            ("Añadir Lote a Producto Existente", self.add_existing_product_lote)
         ]
-
         for text, callback in buttons_info:
             btn = MDButton(
                 MDButtonText(text=text),
-                size_hint=(1, 0.2)
+                size_hint=(0.7, None),
+                height=80,
+                pos_hint={"center_x": 0.5}
             )
             btn.bind(on_press=callback)
-            layout.add_widget(btn)
+            center_box.add_widget(btn)
+        center_box.add_widget(Widget(size_hint_y=0.2))  # Espaciador inferior
+        layout.add_widget(center_box)
+
+        # Botón 'Atrás' abajo a la izquierda
+        bottom_box = MDBoxLayout(orientation='horizontal', size_hint=(1, 0.1))
+        btn_back = MDButton(
+            MDButtonText(text="Atrás"),
+            size_hint=(None, 1),
+            width=120,
+            pos_hint={"x": 0}
+        )
+        btn_back.bind(on_press=self.go_back)
+        bottom_box.add_widget(btn_back)
+        bottom_box.add_widget(Widget())
+        layout.add_widget(bottom_box)
 
         self.add_widget(layout)
 

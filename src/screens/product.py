@@ -108,7 +108,7 @@ class AddProductNameScreen(Screen):
         self.image_preview = Image(size_hint=(1, 0.5))
         layout.add_widget(self.image_preview)
 
-        from kivy.uix.widget import Widget
+       
         button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15), spacing=10)
         # Botón Salir alineado a la izquierda
         salir_button = MDButton(
@@ -171,7 +171,6 @@ class AddProductProveedorScreen(Screen):
         self.proveedor_input = TextInput(hint_text='Proveedor del producto', size_hint=(1, 0.1))
         layout.add_widget(self.proveedor_input)
 
-        from kivy.uix.widget import Widget
         button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15), spacing=10)
         # Botón Salir alineado a la izquierda
         salir_button = MDButton(
@@ -549,7 +548,6 @@ class AddExistingProductLoteScreen(Screen):
         self.camera_widget = CameraWidget(size_hint=(1, 0.5))
         layout.add_widget(self.camera_widget)
 
-        from kivy.uix.widget import Widget
         button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.12), spacing=10)
         # Botón Salir alineado a la izquierda
         salir_button = MDButton(
@@ -590,7 +588,12 @@ class AddExistingProductLoteScreen(Screen):
 
     def on_enter(self):
         products = self.inventory.list_products()
-        self.product_spinner.values = [f"{product[0]} ({product[1]})" for product in products]
+        # Mostrar solo un producto por nombre
+        unique_names = {}
+        for p in products:
+            if p[0] not in unique_names:
+                unique_names[p[0]] = p
+        self.product_spinner.values = [f"{p[0]} ({p[1]})" for p in unique_names.values()]
         self.camera_widget.start_camera()
 
     def on_leave(self):
